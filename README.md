@@ -158,6 +158,12 @@ Track these to validate effectiveness:
 - Project templates
 - YAML frontmatter for automatic skill detection
 
+## Used in automated code review
+
+These skills are not just for code generation — they are also used as the **single source of truth** for automated code review via [`skill-review`](https://github.com/decebals/skill-review), a reusable GitHub Actions workflow that evaluates pull requests against the same skills that Claude Code uses during development.
+
+Same skills. From generation to review. See [`skill-review-sandbox`](https://github.com/decebals/skill-review-sandbox) for a working example.
+
 ## Contributing
 
 Skills are evolving based on real-world usage. Try them, open issues, share what works.
