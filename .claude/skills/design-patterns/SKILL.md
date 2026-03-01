@@ -3,56 +3,56 @@ name: design-patterns
 description: 常见设计模式及 Java 示例（Factory、Builder、Strategy、Observer、Decorator 等）。当用户询问 "implement pattern" (Factory, Builder, Strategy, Observer, Decorator, etc.). Use when user asks "implement pattern", "use factory", "strategy pattern", or when designing extensible components.
 ---
 
-# Design Patterns Skill
+# Design Patterns 技能
 
-Practical design patterns reference for Java with modern examples.
+带有现代示例的 Java 实用设计模式参考。
 
-## When to Use
-- User asks to implement a specific pattern
-- Designing extensible/flexible components
-- Refactoring rigid code structures
-- Code review suggests pattern usage
+## 何时使用
+- 用户要求实现特定模式
+- 设计可扩展/灵活的组件
+- 重构僵化的代码结构
+- 代码审查建议使用模式
 
 ---
 
-## Quick Reference: When to Use What
+## 快速参考：何时使用什么
 
-| Problem | Pattern |
+| 问题 | 模式 |
 |---------|---------|
-| Complex object construction | **Builder** |
-| Create objects without specifying class | **Factory** |
-| Multiple algorithms, swap at runtime | **Strategy** |
-| Add behavior without changing class | **Decorator** |
-| Notify multiple objects of changes | **Observer** |
-| Ensure single instance | **Singleton** |
-| Convert incompatible interfaces | **Adapter** |
-| Define algorithm skeleton | **Template Method** |
+| 复杂对象构造 | **Builder** |
+| 在不指定类的情况下创建对象 | **Factory** |
+| 多种算法，运行时交换 | **Strategy** |
+| 在不更改类的情况下添加行为 | **Decorator** |
+| 通知多个对象更改 | **Observer** |
+| 确保单个实例 | **Singleton** |
+| 转换不兼容的接口 | **Adapter** |
+| 定义算法骨架 | **Template Method** |
 
 ---
 
-## Creational Patterns
+## 创建型模式
 
 ### Builder
 
-**Use when:** Object has many parameters, some optional.
+**使用场景：** 对象有许多参数，其中一些是可选的。
 
 ```java
-// ❌ Telescoping constructor antipattern
+// ❌ 伸缩构造函数反模式
 public class User {
     public User(String name) { }
     public User(String name, String email) { }
     public User(String name, String email, int age) { }
     public User(String name, String email, int age, String phone) { }
-    // ... explosion of constructors
+    // ... 构造函数爆炸
 }
 
-// ✅ Builder pattern
+// ✅ Builder 模式
 public class User {
-    private final String name;      // required
-    private final String email;     // required
-    private final int age;          // optional
-    private final String phone;     // optional
-    private final String address;   // optional
+    private final String name;      // 必需
+    private final String email;     // 必需
+    private final int age;          // 可选
+    private final String phone;     // 可选
+    private final String address;   // 可选
 
     private User(Builder builder) {
         this.name = builder.name;
@@ -67,10 +67,10 @@ public class User {
     }
 
     public static class Builder {
-        // Required
+        // 必需
         private final String name;
         private final String email;
-        // Optional with defaults
+        // 带默认值的可选
         private int age = 0;
         private String phone = "";
         private String address = "";
@@ -101,14 +101,14 @@ public class User {
     }
 }
 
-// Usage
+// 使用
 User user = User.builder("John", "john@example.com")
     .age(30)
     .phone("+1234567890")
     .build();
 ```
 
-**With Lombok:**
+**使用 Lombok：**
 ```java
 @Builder
 @Getter
@@ -124,10 +124,10 @@ public class User {
 
 ### Factory Method
 
-**Use when:** Need to create objects without specifying exact class.
+**使用场景：** 需要在不指定确切类的情况下创建对象。
 
 ```java
-// ✅ Factory Method pattern
+// ✅ Factory Method 模式
 public interface Notification {
     void send(String message);
 }
@@ -166,12 +166,12 @@ public class NotificationFactory {
     }
 }
 
-// Usage
+// 使用
 Notification notification = NotificationFactory.create("EMAIL");
 notification.send("Hello!");
 ```
 
-**With Spring (preferred):**
+**使用 Spring（推荐）：**
 ```java
 public interface NotificationSender {
     void send(String message);
@@ -213,17 +213,17 @@ public class NotificationFactory {
 
 ### Singleton
 
-**Use when:** Exactly one instance needed (use sparingly!).
+**使用场景：** 只需要一个实例（谨慎使用！）。
 
 ```java
-// ✅ Modern singleton (enum-based, thread-safe)
+// ✅ 现代 singleton（基于枚举，线程安全）
 public enum DatabaseConnection {
     INSTANCE;
 
     private Connection connection;
 
     DatabaseConnection() {
-        // Initialize connection
+        // 初始化连接
     }
 
     public Connection getConnection() {
@@ -231,33 +231,33 @@ public enum DatabaseConnection {
     }
 }
 
-// Usage
+// 使用
 Connection conn = DatabaseConnection.INSTANCE.getConnection();
 ```
 
-**With Spring (preferred):**
+**使用 Spring（推荐）：**
 ```java
-@Component  // Default scope is singleton
+@Component  // 默认 scope 是 singleton
 public class DatabaseConnection {
-    // Spring manages single instance
+    // Spring 管理单个实例
 }
 ```
 
-**Warning:** Singletons can be problematic:
-- Hard to test (global state)
-- Hidden dependencies
-- Consider dependency injection instead
+**警告：** Singleton 可能有问题：
+- 难以测试（全局状态）
+- 隐藏的依赖
+- 考虑改用依赖注入
 
 ---
 
-## Behavioral Patterns
+## 行为型模式
 
 ### Strategy
 
-**Use when:** Multiple algorithms for same operation, need to swap at runtime.
+**使用场景：** 同一操作的多种算法，需要在运行时交换。
 
 ```java
-// ✅ Strategy pattern
+// ✅ Strategy 模式
 public interface PaymentStrategy {
     void pay(BigDecimal amount);
 }
@@ -314,25 +314,25 @@ public class ShoppingCart {
     }
 }
 
-// Usage
+// 使用
 ShoppingCart cart = new ShoppingCart();
 cart.setPaymentStrategy(new CreditCardPayment("4111-1111-1111-1111"));
 cart.checkout(new BigDecimal("99.99"));
 
-// Change strategy at runtime
+// 在运行时更改策略
 cart.setPaymentStrategy(new PayPalPayment("user@example.com"));
 cart.checkout(new BigDecimal("49.99"));
 ```
 
-**With Java 8+ (functional):**
+**使用 Java 8+（函数式）：**
 ```java
-// Strategy as functional interface
+// 策略作为函数式接口
 @FunctionalInterface
 public interface PaymentStrategy {
     void pay(BigDecimal amount);
 }
 
-// Usage with lambdas
+// 使用 lambdas
 PaymentStrategy creditCard = amount ->
     System.out.println("Card payment: " + amount);
 
@@ -346,10 +346,10 @@ cart.setPaymentStrategy(creditCard);
 
 ### Observer
 
-**Use when:** Objects need to be notified of changes in another object.
+**使用场景：** 对象需要被通知另一个对象的更改。
 
 ```java
-// ✅ Observer pattern (modern Java)
+// ✅ Observer 模式（现代 Java）
 public interface OrderObserver {
     void onOrderPlaced(Order order);
 }
@@ -366,19 +366,19 @@ public class OrderService {
     }
 
     public void placeOrder(Order order) {
-        // Process order
+        // 处理订单
         saveOrder(order);
 
-        // Notify all observers
+        // 通知所有观察者
         observers.forEach(observer -> observer.onOrderPlaced(order));
     }
 }
 
-// Observers
+// 观察者
 public class InventoryService implements OrderObserver {
     @Override
     public void onOrderPlaced(Order order) {
-        // Reduce inventory
+        // 减少库存
         order.getItems().forEach(item ->
             reduceStock(item.getProductId(), item.getQuantity())
         );
@@ -399,14 +399,14 @@ public class AnalyticsService implements OrderObserver {
     }
 }
 
-// Setup
+// 设置
 OrderService orderService = new OrderService();
 orderService.addObserver(new InventoryService());
 orderService.addObserver(new EmailNotificationService());
 orderService.addObserver(new AnalyticsService());
 ```
 
-**With Spring Events (preferred):**
+**使用 Spring Events（推荐）：**
 ```java
 // Event
 public record OrderPlacedEvent(Order order) {}
@@ -422,12 +422,12 @@ public class OrderService {
     }
 }
 
-// Listeners (observers)
+// Listeners（观察者）
 @Component
 public class InventoryListener {
     @EventListener
     public void handleOrderPlaced(OrderPlacedEvent event) {
-        // Reduce inventory
+        // 减少库存
     }
 }
 
@@ -435,13 +435,13 @@ public class InventoryListener {
 public class EmailListener {
     @EventListener
     public void handleOrderPlaced(OrderPlacedEvent event) {
-        // Send email
+        // 发送邮件
     }
 
     @EventListener
-    @Async  // Async processing
+    @Async  // 异步处理
     public void handleOrderPlacedAsync(OrderPlacedEvent event) {
-        // Send email asynchronously
+        // 异步发送邮件
     }
 }
 ```
@@ -450,13 +450,13 @@ public class EmailListener {
 
 ### Template Method
 
-**Use when:** Define algorithm skeleton, let subclasses fill in steps.
+**使用场景：** 定义算法骨架，让子类填充步骤。
 
 ```java
-// ✅ Template Method pattern
+// ✅ Template Method 模式
 public abstract class DataProcessor {
 
-    // Template method - defines the algorithm
+    // 模板方法 - 定义算法
     public final void process() {
         readData();
         processData();
@@ -466,12 +466,12 @@ public abstract class DataProcessor {
         }
     }
 
-    // Steps to be implemented by subclasses
+    // 子类要实现的步骤
     protected abstract void readData();
     protected abstract void processData();
     protected abstract void writeData();
 
-    // Hook - optional override
+    // Hook - 可选覆盖
     protected boolean shouldNotify() {
         return true;
     }
@@ -516,11 +516,11 @@ public class ApiDataProcessor extends DataProcessor {
 
     @Override
     protected boolean shouldNotify() {
-        return false;  // Override hook
+        return false;  // 覆盖 hook
     }
 }
 
-// Usage
+// 使用
 DataProcessor csvProcessor = new CsvDataProcessor();
 csvProcessor.process();
 
@@ -530,14 +530,14 @@ apiProcessor.process();
 
 ---
 
-## Structural Patterns
+## 结构型模式
 
 ### Decorator
 
-**Use when:** Add behavior dynamically without modifying existing classes.
+**使用场景：** 在不修改现有类的情况下动态添加行为。
 
 ```java
-// ✅ Decorator pattern
+// ✅ Decorator 模式
 public interface Coffee {
     String getDescription();
     BigDecimal getCost();
@@ -555,7 +555,7 @@ public class SimpleCoffee implements Coffee {
     }
 }
 
-// Base decorator
+// 基础 decorator
 public abstract class CoffeeDecorator implements Coffee {
     protected final Coffee coffee;
 
@@ -574,7 +574,7 @@ public abstract class CoffeeDecorator implements Coffee {
     }
 }
 
-// Concrete decorators
+// 具体 decorators
 public class MilkDecorator extends CoffeeDecorator {
     public MilkDecorator(Coffee coffee) {
         super(coffee);
@@ -623,7 +623,7 @@ public class WhippedCreamDecorator extends CoffeeDecorator {
     }
 }
 
-// Usage - compose decorators
+// 使用 - 组合 decorators
 Coffee coffee = new SimpleCoffee();
 coffee = new MilkDecorator(coffee);
 coffee = new SugarDecorator(coffee);
@@ -633,9 +633,9 @@ System.out.println(coffee.getDescription());  // Coffee, Milk, Sugar, Whipped Cr
 System.out.println(coffee.getCost());         // 3.40
 ```
 
-**Java I/O uses Decorator:**
+**Java I/O 使用 Decorator：**
 ```java
-// Classic example from Java
+// Java 中的经典示例
 BufferedReader reader = new BufferedReader(
     new InputStreamReader(
         new FileInputStream("file.txt")
@@ -647,17 +647,17 @@ BufferedReader reader = new BufferedReader(
 
 ### Adapter
 
-**Use when:** Make incompatible interfaces work together.
+**使用场景：** 使不兼容的接口一起工作。
 
 ```java
-// ✅ Adapter pattern
+// ✅ Adapter 模式
 
-// Existing interface our code uses
+// 我们的代码使用的现有接口
 public interface MediaPlayer {
     void play(String filename);
 }
 
-// Legacy/third-party interface
+// 遗留/第三方接口
 public class LegacyAudioPlayer {
     public void playMp3(String filename) {
         System.out.println("Playing MP3: " + filename);
@@ -697,7 +697,7 @@ public class VideoPlayerAdapter implements MediaPlayer {
     }
 }
 
-// Usage
+// 使用
 MediaPlayer mp3Player = new Mp3PlayerAdapter();
 mp3Player.play("song.mp3");
 
@@ -707,33 +707,33 @@ videoPlayer.play("movie.mp4");
 
 ---
 
-## Pattern Selection Guide
+## 模式选择指南
 
-| Situation | Consider |
+| 情况 | 考虑 |
 |-----------|----------|
-| Object creation is complex | Builder, Factory |
-| Need to add features dynamically | Decorator |
-| Multiple implementations of algorithm | Strategy |
-| React to state changes | Observer |
-| Integrate with legacy code | Adapter |
-| Common algorithm, varying steps | Template Method |
-| Need single instance | Singleton (use sparingly) |
+| 对象创建复杂 | Builder、Factory |
+| 需要动态添加功能 | Decorator |
+| 算法的多种实现 | Strategy |
+| 对状态变化做出反应 | Observer |
+| 与遗留代码集成 | Adapter |
+| 通用算法，步骤不同 | Template Method |
+| 需要单个实例 | Singleton（谨慎使用）|
 
 ---
 
-## Anti-Patterns to Avoid
+## 要避免的反模式
 
-| Anti-Pattern | Problem | Better Approach |
+| 反模式 | 问题 | 更好的方法 |
 |--------------|---------|-----------------|
-| Singleton abuse | Global state, hard to test | Dependency Injection |
-| Factory everywhere | Over-engineering | Simple `new` if type is known |
-| Deep decorator chains | Hard to debug | Keep chains short, consider composition |
-| Observer with many events | Spaghetti notifications | Event bus, clear event hierarchy |
+| Singleton 滥用 | 全局状态，难以测试 | 依赖注入 |
+| Factory 到处用 | 过度工程 | 如果类型已知，使用简单的 `new` |
+| 深层 decorator 链 | 难以调试 | 保持链简短，考虑组合 |
+| Observer 与许多事件 | 意大利面式通知 | 事件总线，清晰的事件层次结构 |
 
 ---
 
-## Related Skills
+## 相关技能
 
-- `solid-principles` - Design principles that patterns help implement
-- `clean-code` - Code-level best practices
-- `spring-boot-patterns` - Spring-specific implementations
+- `solid-principles` - 模式帮助实现的设计原则
+- `clean-code` - 代码级最佳实践
+- `spring-boot-patterns` - Spring 特定实现

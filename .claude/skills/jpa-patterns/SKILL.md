@@ -3,40 +3,40 @@ name: jpa-patterns
 description: Spring 应用程序的 JPA/Hibernate 模式和常见陷阱（N+1、lazy loading、事务、查询）。当有 JPA 性能问题时使用 (N+1, lazy loading, transactions, queries). Use when user has JPA performance issues, LazyInitializationException, or asks about entity relationships and fetching strategies.
 ---
 
-# JPA Patterns Skill
+# JPA Patterns 技能
 
-Best practices and common pitfalls for JPA/Hibernate in Spring applications.
+Spring 应用程序中 JPA/Hibernate 的最佳实践和常见陷阱。
 
-## When to Use
-- User mentions "N+1 problem" / "too many queries"
-- LazyInitializationException errors
-- Questions about fetch strategies (EAGER vs LAZY)
-- Transaction management issues
-- Entity relationship design
-- Query optimization
+## 何时使用
+- 用户提到 "N+1 problem" / "too many queries"
+- LazyInitializationException 错误
+- 关于获取策略的问题（EAGER vs LAZY）
+- 事务管理问题
+- 实体关系设计
+- 查询优化
 
 ---
 
-## Quick Reference: Common Problems
+## 快速参考：常见问题
 
-| Problem | Symptom | Solution |
+| 问题 | 症状 | 解决方案 |
 |---------|---------|----------|
-| N+1 queries | Many SELECT statements | JOIN FETCH, @EntityGraph |
-| LazyInitializationException | Error outside transaction | Open Session in View, DTO projection, JOIN FETCH |
-| Slow queries | Performance issues | Pagination, projections, indexes |
-| Dirty checking overhead | Slow updates | Read-only transactions, DTOs |
-| Lost updates | Concurrent modifications | Optimistic locking (@Version) |
+| N+1 queries | 许多 SELECT 语句 | JOIN FETCH、@EntityGraph |
+| LazyInitializationException | 事务外错误 | Open Session in View、DTO projection、JOIN FETCH |
+| Slow queries | 性能问题 | 分页、projections、索引 |
+| Dirty checking overhead | 更新慢 | 只读事务、DTOs |
+| Lost updates | 并发修改 | 乐观锁（@Version）|
 
 ---
 
-## N+1 Problem
+## N+1 问题
 
-> The #1 JPA performance killer
+> JPA 性能杀手 #1
 
-### The Problem
+### 问题所在
 
 ```java
-// ❌ BAD: N+1 queries
+// ❌ 坏：N+1 查询
 @Entity
 public class Author {
     @Id private Long id;
@@ -46,43 +46,43 @@ public class Author {
     private List<Book> books;
 }
 
-// This innocent code...
-List<Author> authors = authorRepository.findAll();  // 1 query
+// 这段看似无害的代码...
+List<Author> authors = authorRepository.findAll();  // 1 个查询
 for (Author author : authors) {
-    System.out.println(author.getBooks().size());   // N queries!
+    System.out.println(author.getBooks().size());   // N 个查询！
 }
-// Result: 1 + N queries (if 100 authors = 101 queries)
+// 结果：1 + N 个查询（如果有 100 个作者 = 101 个查询）
 ```
 
-### Solution 1: JOIN FETCH (JPQL)
+### 解决方案 1：JOIN FETCH (JPQL)
 
 ```java
-// ✅ GOOD: Single query with JOIN FETCH
+// ✅ 好：使用 JOIN FETCH 的单个查询
 public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @Query("SELECT a FROM Author a JOIN FETCH a.books")
     List<Author> findAllWithBooks();
 }
 
-// Usage - single query
+// 使用 - 单个查询
 List<Author> authors = authorRepository.findAllWithBooks();
 ```
 
-### Solution 2: @EntityGraph
+### 解决方案 2：@EntityGraph
 
 ```java
-// ✅ GOOD: EntityGraph for declarative fetching
+// ✅ 好：用于声明式获取的 EntityGraph
 public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @EntityGraph(attributePaths = {"books"})
     List<Author> findAll();
 
-    // Or with named graph
+    // 或使用命名图
     @EntityGraph(value = "Author.withBooks")
     List<Author> findAllWithBooks();
 }
 
-// Define named graph on entity
+// 在实体上定义命名图
 @Entity
 @NamedEntityGraph(
     name = "Author.withBooks",
@@ -93,26 +93,26 @@ public class Author {
 }
 ```
 
-### Solution 3: Batch Fetching
+### 解决方案 3：批量获取
 
 ```java
-// ✅ GOOD: Batch fetching (Hibernate-specific)
+// ✅ 好：批量获取（Hibernate 特定）
 @Entity
 public class Author {
 
     @OneToMany(mappedBy = "author")
-    @BatchSize(size = 25)  // Fetch 25 at a time
+    @BatchSize(size = 25)  // 每次获取 25 个
     private List<Book> books;
 }
 
-// Or globally in application.properties
+// 或在 application.properties 中全局设置
 spring.jpa.properties.hibernate.default_batch_fetch_size=25
 ```
 
-### Detecting N+1
+### 检测 N+1
 
 ```yaml
-# Enable SQL logging to detect N+1
+# 启用 SQL 日志以检测 N+1
 spring:
   jpa:
     show-sql: true
@@ -128,32 +128,32 @@ logging:
 
 ---
 
-## Lazy Loading
+## 懒加载
 
-### FetchType Basics
+### FetchType 基础
 
 ```java
 @Entity
 public class Order {
 
-    // LAZY: Load only when accessed (default for collections)
+    // LAZY：仅在访问时加载（集合的默认值）
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<OrderItem> items;
 
-    // EAGER: Always load immediately (default for @ManyToOne, @OneToOne)
-    @ManyToOne(fetch = FetchType.EAGER)  // ⚠️ Usually bad
+    // EAGER：始终立即加载（@ManyToOne、@OneToOne 的默认值）
+    @ManyToOne(fetch = FetchType.EAGER)  // ⚠️ 通常不好
     private Customer customer;
 }
 ```
 
-### Best Practice: Default to LAZY
+### 最佳实践：默认使用 LAZY
 
 ```java
-// ✅ GOOD: Always use LAZY, fetch when needed
+// ✅ 好：始终使用 LAZY，需要时获取
 @Entity
 public class Order {
 
-    @ManyToOne(fetch = FetchType.LAZY)  // Override EAGER default
+    @ManyToOne(fetch = FetchType.LAZY)  // 覆盖 EAGER 默认值
     private Customer customer;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
@@ -164,7 +164,7 @@ public class Order {
 ### LazyInitializationException
 
 ```java
-// ❌ BAD: Accessing lazy field outside transaction
+// ❌ 坏：在事务外访问懒加载字段
 @Service
 public class OrderService {
 
@@ -173,39 +173,39 @@ public class OrderService {
     }
 }
 
-// In controller (no transaction)
+// 在 controller 中（无事务）
 Order order = orderService.getOrder(1L);
 order.getItems().size();  // 💥 LazyInitializationException!
 ```
 
-### Solutions for LazyInitializationException
+### LazyInitializationException 的解决方案
 
-**Solution 1: JOIN FETCH in query**
+**解决方案 1：在查询中使用 JOIN FETCH**
 ```java
-// ✅ Fetch needed associations in query
+// ✅ 在查询中获取所需的关联
 @Query("SELECT o FROM Order o JOIN FETCH o.items WHERE o.id = :id")
 Optional<Order> findByIdWithItems(@Param("id") Long id);
 ```
 
-**Solution 2: @Transactional on service method**
+**解决方案 2：在 service 方法上使用 @Transactional**
 ```java
-// ✅ Keep transaction open while accessing
+// ✅ 在访问时保持事务打开
 @Service
 public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderDTO getOrderWithItems(Long id) {
         Order order = orderRepository.findById(id).orElseThrow();
-        // Access within transaction
+        // 在事务内访问
         int itemCount = order.getItems().size();
         return new OrderDTO(order, itemCount);
     }
 }
 ```
 
-**Solution 3: DTO Projection (recommended)**
+**解决方案 3：DTO Projection（推荐）**
 ```java
-// ✅ BEST: Return only what you need
+// ✅ 最佳：只返回你需要的内容
 public interface OrderSummary {
     Long getId();
     String getStatus();
@@ -217,48 +217,48 @@ public interface OrderSummary {
 Optional<OrderSummary> findOrderSummary(@Param("id") Long id);
 ```
 
-**Solution 4: Open Session in View (not recommended)**
+**解决方案 4：Open Session in View（不推荐）**
 ```yaml
-# Keeps session open during view rendering
-# ⚠️ Can mask N+1 problems, use with caution
+# 在视图渲染期间保持 session 打开
+# ⚠️ 可能掩盖 N+1 问题，谨慎使用
 spring:
   jpa:
-    open-in-view: true  # Default is true
+    open-in-view: true  # 默认为 true
 ```
 
 ---
 
-## Transactions
+## 事务
 
-### Basic Transaction Management
+### 基本事务管理
 
 ```java
 @Service
 public class OrderService {
 
-    // Read-only: Optimized, no dirty checking
+    // 只读：已优化，无 dirty checking
     @Transactional(readOnly = true)
     public Order findById(Long id) {
         return orderRepository.findById(id).orElseThrow();
     }
 
-    // Write: Full transaction with dirty checking
+    // 写入：带 dirty checking 的完整事务
     @Transactional
     public Order createOrder(CreateOrderRequest request) {
         Order order = new Order();
-        // ... set properties
+        // ... 设置属性
         return orderRepository.save(order);
     }
 
-    // Explicit rollback
+    // 显式回滚
     @Transactional(rollbackFor = Exception.class)
     public void processPayment(Long orderId) throws PaymentException {
-        // Rolls back on any exception, not just RuntimeException
+        // 在任何异常时回滚，不仅仅是 RuntimeException
     }
 }
 ```
 
-### Transaction Propagation
+### 事务传播
 
 ```java
 @Service
@@ -271,74 +271,74 @@ public class OrderService {
     public void placeOrder(Order order) {
         orderRepository.save(order);
 
-        // REQUIRED (default): Uses existing or creates new
+        // REQUIRED（默认）：使用现有事务或创建新事务
         paymentService.processPayment(order);
 
-        // If paymentService throws, entire order is rolled back
+        // 如果 paymentService 抛出异常，整个订单回滚
     }
 }
 
 @Service
 public class PaymentService {
 
-    // REQUIRES_NEW: Always creates new transaction
-    // If this fails, order can still be saved
+    // REQUIRES_NEW：始终创建新事务
+    // 如果失败，订单仍可保存
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processPayment(Order order) {
-        // Independent transaction
+        // 独立事务
     }
 
-    // MANDATORY: Must run within existing transaction
+    // MANDATORY：必须在现有事务中运行
     @Transactional(propagation = Propagation.MANDATORY)
     public void updatePaymentStatus(Order order) {
-        // Throws if no transaction exists
+        // 如果不存在事务则抛出异常
     }
 }
 ```
 
-### Common Transaction Mistakes
+### 常见事务错误
 
 ```java
-// ❌ BAD: Calling @Transactional method from same class
+// ❌ 坏：从同一类调用 @Transactional 方法
 @Service
 public class OrderService {
 
     public void processOrder(Long id) {
-        updateOrder(id);  // @Transactional is IGNORED!
+        updateOrder(id);  // @Transactional 被忽略！
     }
 
     @Transactional
     public void updateOrder(Long id) {
-        // Transaction not started because called internally
+        // 因为内部调用，事务未启动
     }
 }
 
-// ✅ GOOD: Inject self or use separate service
+// ✅ 好：注入 self 或使用单独的 service
 @Service
 public class OrderService {
 
     @Autowired
-    private OrderService self;  // Or use separate service
+    private OrderService self;  // 或使用单独的 service
 
     public void processOrder(Long id) {
-        self.updateOrder(id);  // Now transaction works
+        self.updateOrder(id);  // 现在事务正常工作
     }
 
     @Transactional
     public void updateOrder(Long id) {
-        // Transaction properly started
+        // 事务正确启动
     }
 }
 ```
 
 ---
 
-## Entity Relationships
+## 实体关系
 
 ### OneToMany / ManyToOne
 
 ```java
-// ✅ GOOD: Bidirectional with proper mapping
+// ✅ 好：具有正确映射的双向关联
 @Entity
 public class Author {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -347,7 +347,7 @@ public class Author {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books = new ArrayList<>();
 
-    // Helper methods for bidirectional sync
+    // 用于双向同步的辅助方法
     public void addBook(Book book) {
         books.add(book);
         book.setAuthor(this);
@@ -373,7 +373,7 @@ public class Book {
 ### ManyToMany
 
 ```java
-// ✅ GOOD: ManyToMany with Set (not List) to avoid duplicates
+// ✅ 好：ManyToMany 使用 Set（而不是 List）以避免重复
 @Entity
 public class Student {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -408,16 +408,16 @@ public class Course {
 }
 ```
 
-### equals() and hashCode() for Entities
+### 实体的 equals() 和 hashCode()
 
 ```java
-// ✅ GOOD: Use business key or ID carefully
+// ✅ 好：谨慎使用业务键或 ID
 @Entity
 public class Book {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NaturalId  // Hibernate annotation for business key
+    @NaturalId  // Hibernate 注解用于业务键
     @Column(unique = true, nullable = false)
     private String isbn;
 
@@ -430,24 +430,24 @@ public class Book {
 
     @Override
     public int hashCode() {
-        return Objects.hash(isbn);  // Use business key, not ID
+        return Objects.hash(isbn);  // 使用业务键，而非 ID
     }
 }
 ```
 
 ---
 
-## Query Optimization
+## 查询优化
 
-### Pagination
+### 分页
 
 ```java
-// ✅ GOOD: Always paginate large result sets
+// ✅ 好：始终对大结果集进行分页
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
 
-    // With sorting
+    // 带排序
     @Query("SELECT o FROM Order o WHERE o.status = :status")
     Page<Order> findByStatusSorted(
         @Param("status") OrderStatus status,
@@ -455,7 +455,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     );
 }
 
-// Usage
+// 使用
 Pageable pageable = PageRequest.of(0, 20, Sort.by("createdAt").descending());
 Page<Order> orders = orderRepository.findByStatus(OrderStatus.PENDING, pageable);
 ```
@@ -463,9 +463,9 @@ Page<Order> orders = orderRepository.findByStatus(OrderStatus.PENDING, pageable)
 ### DTO Projections
 
 ```java
-// ✅ GOOD: Fetch only needed columns
+// ✅ 好：仅获取所需的列
 
-// Interface-based projection
+// 基于接口的 projection
 public interface OrderSummary {
     Long getId();
     String getCustomerName();
@@ -476,7 +476,7 @@ public interface OrderSummary {
        "FROM Order o WHERE o.status = :status")
 List<OrderSummary> findOrderSummaries(@Param("status") OrderStatus status);
 
-// Class-based projection (DTO)
+// 基于类的 projection（DTO）
 public record OrderDTO(Long id, String customerName, BigDecimal total) {}
 
 @Query("SELECT new com.example.dto.OrderDTO(o.id, o.customer.name, o.total) " +
@@ -484,10 +484,10 @@ public record OrderDTO(Long id, String customerName, BigDecimal total) {}
 List<OrderDTO> findOrderDTOs(@Param("status") OrderStatus status);
 ```
 
-### Bulk Operations
+### 批量操作
 
 ```java
-// ✅ GOOD: Bulk update instead of loading entities
+// ✅ 好：批量更新而非加载实体
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Modifying
@@ -505,7 +505,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     );
 }
 
-// Usage
+// 使用
 @Transactional
 public void archiveOldOrders() {
     LocalDateTime threshold = LocalDateTime.now().minusYears(1);
@@ -519,12 +519,12 @@ public void archiveOldOrders() {
 
 ---
 
-## Optimistic Locking
+## 乐观锁
 
-### Prevent Lost Updates
+### 防止丢失更新
 
 ```java
-// ✅ GOOD: Use @Version for optimistic locking
+// ✅ 好：使用 @Version 进行乐观锁
 @Entity
 public class Order {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -537,12 +537,12 @@ public class Order {
     private BigDecimal total;
 }
 
-// When two users update same order:
-// User 1: loads order (version=1), modifies, saves → version becomes 2
-// User 2: loads order (version=1), modifies, saves → OptimisticLockException!
+// 当两个用户更新同一订单时：
+// 用户 1：加载订单（version=1），修改，保存 → version 变为 2
+// 用户 2：加载订单（version=1），修改，保存 → OptimisticLockException!
 ```
 
-### Handling OptimisticLockException
+### 处理 OptimisticLockException
 
 ```java
 @Service
@@ -561,7 +561,7 @@ public class OrderService {
         }
     }
 
-    // Or with retry
+    // 或使用重试
     @Retryable(value = OptimisticLockException.class, maxAttempts = 3)
     @Transactional
     public Order updateOrderWithRetry(Long id, UpdateOrderRequest request) {
@@ -574,20 +574,20 @@ public class OrderService {
 
 ---
 
-## Common Mistakes
+## 常见错误
 
-### 1. Cascade Misuse
+### 1. 级联误用
 
 ```java
-// ❌ BAD: CascadeType.ALL on @ManyToOne
+// ❌ 坏：在 @ManyToOne 上使用 CascadeType.ALL
 @Entity
 public class Book {
-    @ManyToOne(cascade = CascadeType.ALL)  // Dangerous!
+    @ManyToOne(cascade = CascadeType.ALL)  // 危险！
     private Author author;
 }
-// Deleting a book could delete the author!
+// 删除一本书可能会删除作者！
 
-// ✅ GOOD: Cascade only from parent to child
+// ✅ 好：仅从父级到子级级联
 @Entity
 public class Author {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -595,14 +595,14 @@ public class Author {
 }
 ```
 
-### 2. Missing Index
+### 2. 缺少索引
 
 ```java
-// ❌ BAD: Frequent queries on non-indexed column
+// ❌ 坏：在非索引列上频繁查询
 @Query("SELECT o FROM Order o WHERE o.customerEmail = :email")
 List<Order> findByCustomerEmail(@Param("email") String email);
 
-// ✅ GOOD: Add index
+// ✅ 好：添加索引
 @Entity
 @Table(indexes = @Index(name = "idx_order_customer_email", columnList = "customerEmail"))
 public class Order {
@@ -610,10 +610,10 @@ public class Order {
 }
 ```
 
-### 3. toString() with Lazy Fields
+### 3. toString() 包含懒加载字段
 
 ```java
-// ❌ BAD: toString includes lazy collection
+// ❌ 坏：toString 包含懒加载集合
 @Entity
 public class Author {
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
@@ -621,11 +621,11 @@ public class Author {
 
     @Override
     public String toString() {
-        return "Author{id=" + id + ", books=" + books + "}";  // Triggers lazy load!
+        return "Author{id=" + id + ", books=" + books + "}";  // 触发懒加载！
     }
 }
 
-// ✅ GOOD: Exclude lazy fields from toString
+// ✅ 好：从 toString 中排除懒加载字段
 @Override
 public String toString() {
     return "Author{id=" + id + ", name='" + name + "'}";
@@ -634,24 +634,24 @@ public String toString() {
 
 ---
 
-## Performance Checklist
+## 性能清单
 
-When reviewing JPA code, check:
+审查 JPA 代码时，检查：
 
-- [ ] No N+1 queries (use JOIN FETCH or @EntityGraph)
-- [ ] LAZY fetch by default (especially @ManyToOne)
-- [ ] Pagination for large result sets
-- [ ] DTO projections for read-only queries
-- [ ] Bulk operations for batch updates/deletes
-- [ ] @Version for entities with concurrent access
-- [ ] Indexes on frequently queried columns
-- [ ] No lazy fields in toString()
-- [ ] Read-only transactions where applicable
+- [ ] 无 N+1 查询（使用 JOIN FETCH 或 @EntityGraph）
+- [ ] 默认 LAZY 获取（特别是 @ManyToOne）
+- [ ] 大结果集的分页
+- [ ] 只读查询的 DTO projections
+- [ ] 批量更新/删除的批量操作
+- [ ] 并发访问实体的 @Version
+- [ ] 频繁查询列上的索引
+- [ ] toString() 中无懒加载字段
+- [ ] 适用时的只读事务
 
 ---
 
-## Related Skills
+## 相关技能
 
-- `spring-boot-patterns` - Spring Boot controller/service patterns
-- `java-code-review` - General code review checklist
-- `clean-code` - Code quality principles
+- `spring-boot-patterns` - Spring Boot controller/service 模式
+- `java-code-review` - 通用代码审查清单
+- `clean-code` - 代码质量原则

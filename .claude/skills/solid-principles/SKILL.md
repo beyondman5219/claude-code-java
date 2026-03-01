@@ -1,58 +1,58 @@
 ---
 name: solid-principles
-description: SOLID 原则清单及详细的 Java 示例。每个原则包括违反示例、重构解决方案和检测模式. Use when reviewing classes, refactoring code, or when user asks about Single Responsibility, Open/Closed, Liskov, Interface Segregation, or Dependency Inversion.
+description: SOLID 原则清单及详细的 Java 示例。每个原则包括违反示例、重构解决方案和检测模式。当审查类、重构代码或用户询问 Single Responsibility、Open/Closed、Liskov、Interface Segregation 或 Dependency Inversion 时使用。
 ---
 
-# SOLID Principles Skill
+# SOLID Principles 技能
 
-Review and apply SOLID principles in Java code.
+审查并在 Java 代码中应用 SOLID 原则。
 
-## When to Use
-- User says "check SOLID" / "SOLID review" / "is this class doing too much?"
-- Reviewing class design
-- Refactoring large classes
-- Code review focusing on design
+## 何时使用
+- 用户说 "check SOLID" / "SOLID review" / "is this class doing too much?"
+- 审查类设计
+- 重构大类
+- 专注于设计的代码审查
 
 ---
 
-## Quick Reference
+## 快速参考
 
-| Letter | Principle | One-liner |
+| Letter | Principle | 一句话 |
 |--------|-----------|-----------|
-| **S** | Single Responsibility | One class = one reason to change |
-| **O** | Open/Closed | Open for extension, closed for modification |
-| **L** | Liskov Substitution | Subtypes must be substitutable for base types |
-| **I** | Interface Segregation | Many specific interfaces > one general interface |
-| **D** | Dependency Inversion | Depend on abstractions, not concretions |
+| **S** | Single Responsibility | 一个类 = 一个变更原因 |
+| **O** | Open/Closed | 对扩展开放，对修改关闭 |
+| **L** | Liskov Substitution | 子类型必须可替换基类型 |
+| **I** | Interface Segregation | 多个特定接口 > 一个通用接口 |
+| **D** | Dependency Inversion | 依赖抽象，不依赖具体 |
 
 ---
 
 ## S - Single Responsibility Principle (SRP)
 
-> "A class should have only one reason to change."
+> "一个类应该只有一个变更原因。"
 
-### Violation
+### 违反
 
 ```java
-// ❌ BAD: UserService does too much
+// ❌ 坏：UserService 做得太多
 public class UserService {
 
     public User createUser(String name, String email) {
-        // validation logic
+        // 验证逻辑
         if (email == null || !email.contains("@")) {
             throw new IllegalArgumentException("Invalid email");
         }
 
-        // persistence logic
+        // 持久化逻辑
         User user = new User(name, email);
         entityManager.persist(user);
 
-        // notification logic
+        // 通知逻辑
         String subject = "Welcome!";
         String body = "Hello " + name;
         emailClient.send(email, subject, body);
 
-        // audit logic
+        // 审计逻辑
         auditLog.log("User created: " + email);
 
         return user;
@@ -60,16 +60,16 @@ public class UserService {
 }
 ```
 
-**Problems:**
-- Validation changes? Modify UserService
-- Email template changes? Modify UserService
-- Audit format changes? Modify UserService
-- Hard to test each concern separately
+**问题：**
+- 验证更改？修改 UserService
+- 邮件模板更改？修改 UserService
+- 审计格式更改？修改 UserService
+- 难以单独测试每个关注点
 
-### Refactored
+### 重构后
 
 ```java
-// ✅ GOOD: Each class has one responsibility
+// ✅ 好：每个类有一个职责
 
 public class UserValidator {
     public void validate(String name, String email) {
@@ -116,30 +116,30 @@ public class UserService {
 }
 ```
 
-### How to Detect SRP Violations
+### 如何检测 SRP 违反
 
-- Class has many `import` statements from different domains
-- Class name contains "And" or "Manager" or "Handler" (often)
-- Methods operate on unrelated data
-- Changes in one area require touching unrelated methods
-- Hard to name the class concisely
+- 类有来自不同领域的许多 `import` 语句
+- 类名包含 "And" 或 "Manager" 或 "Handler"（通常）
+- 方法操作不相关的数据
+- 一个区域的更改需要接触不相关的方法
+- 难以简洁地命名类
 
-### Quick Check Questions
+### 快速检查问题
 
-1. Can you describe the class purpose in one sentence without "and"?
-2. Would different stakeholders request changes to this class?
-3. Are there methods that don't use most of the class fields?
+1. 能否用一句话（没有 "and"）描述类目的？
+2. 不同的利益相关者是否会要求更改这个类？
+3. 是否有方法不使用类的大部分字段？
 
 ---
 
 ## O - Open/Closed Principle (OCP)
 
-> "Software entities should be open for extension, but closed for modification."
+> "软件实体应该对扩展开放，但对修改关闭。"
 
-### Violation
+### 违反
 
 ```java
-// ❌ BAD: Must modify class to add new discount type
+// ❌ 坏：必须修改类以添加新的折扣类型
 public class DiscountCalculator {
 
     public double calculate(Order order, String discountType) {
@@ -150,16 +150,16 @@ public class DiscountCalculator {
         } else if (discountType.equals("LOYALTY")) {
             return order.getTotal() * order.getCustomer().getLoyaltyRate();
         }
-        // Every new discount type = modify this class
+        // 每个新折扣类型 = 修改此类
         return 0;
     }
 }
 ```
 
-### Refactored
+### 重构后
 
 ```java
-// ✅ GOOD: Add new discounts without modifying existing code
+// ✅ 好：添加新折扣而无需修改现有代码
 
 public interface DiscountStrategy {
     double calculate(Order order);
@@ -202,7 +202,7 @@ public class LoyaltyDiscount implements DiscountStrategy {
     }
 }
 
-// New discount? Just add new class, no modification needed
+// 新折扣？只需添加新类，无需修改
 public class SeasonalDiscount implements DiscountStrategy {
     @Override
     public double calculate(Order order) {
@@ -232,31 +232,31 @@ public class DiscountCalculator {
 }
 ```
 
-### How to Detect OCP Violations
+### 如何检测 OCP 违反
 
-- `if/else` or `switch` on type/status that grows over time
-- Enum-based dispatching with frequent new values
-- Changes require modifying core classes
+- 随时间增长的基于类型/状态的 `if/else` 或 `switch`
+- 频繁有新值的基于 Enum 的分发
+- 更改需要修改核心类
 
-### Common OCP Patterns
+### 常见 OCP 模式
 
-| Pattern | Use When |
+| Pattern | 何时使用 |
 |---------|----------|
-| Strategy | Multiple algorithms for same operation |
-| Template Method | Same structure, different steps |
-| Decorator | Add behavior dynamically |
-| Factory | Create objects without specifying class |
+| Strategy | 同一操作的多种算法 |
+| Template Method | 相同结构、不同步骤 |
+| Decorator | 动态添加行为 |
+| Factory | 无需指定类创建对象 |
 
 ---
 
 ## L - Liskov Substitution Principle (LSP)
 
-> "Subtypes must be substitutable for their base types."
+> "子类型必须可替换其基类型。"
 
-### Violation
+### 违反
 
 ```java
-// ❌ BAD: Square violates Rectangle contract
+// ❌ 坏：Square 违反 Rectangle 契约
 public class Rectangle {
     protected int width;
     protected int height;
@@ -278,28 +278,28 @@ public class Square extends Rectangle {
     @Override
     public void setWidth(int width) {
         this.width = width;
-        this.height = width;  // Violates expected behavior!
+        this.height = width;  // 违反预期行为！
     }
 
     @Override
     public void setHeight(int height) {
-        this.width = height;  // Violates expected behavior!
+        this.width = height;  // 违反预期行为！
         this.height = height;
     }
 }
 
-// This test fails for Square!
+// 此测试对 Square 失败！
 void testRectangle(Rectangle r) {
     r.setWidth(5);
     r.setHeight(4);
-    assert r.getArea() == 20;  // Square returns 16!
+    assert r.getArea() == 20;  // Square 返回 16！
 }
 ```
 
-### Refactored
+### 重构后
 
 ```java
-// ✅ GOOD: Separate abstractions
+// ✅ 好：分离的抽象
 
 public interface Shape {
     int getArea();
@@ -334,29 +334,29 @@ public class Square implements Shape {
 }
 ```
 
-### LSP Rules
+### LSP 规则
 
-| Rule | Meaning |
+| Rule | 含义 |
 |------|---------|
-| Preconditions | Subclass cannot strengthen (require more) |
-| Postconditions | Subclass cannot weaken (promise less) |
-| Invariants | Subclass must maintain parent's invariants |
-| History | Subclass cannot modify inherited state unexpectedly |
+| Preconditions | 子类不能加强（要求更多）|
+| Postconditions | 子类不能削弱（承诺更少）|
+| Invariants | 子类必须保持父类的不变式 |
+| History | 子类不能意外修改继承的状态 |
 
-### How to Detect LSP Violations
+### 如何检测 LSP 违反
 
-- Subclass throws exception parent doesn't
-- Subclass returns null where parent returns object
-- Subclass ignores or overrides parent behavior unexpectedly
-- `instanceof` checks before calling methods
-- Empty or throwing implementations of interface methods
+- 子类抛出父类没有的异常
+- 子类在父类返回对象的地方返回 null
+- 子类忽略或意外覆盖父类行为
+- 调用方法前的 `instanceof` 检查
+- 接口方法的空或抛出实现
 
-### Quick Check
+### 快速检查
 
 ```java
-// If you see this, LSP might be violated
+// 如果你看到这个，LSP 可能被违反
 if (bird instanceof Penguin) {
-    // don't call fly()
+    // 不调用 fly()
 } else {
     bird.fly();
 }
@@ -366,12 +366,12 @@ if (bird instanceof Penguin) {
 
 ## I - Interface Segregation Principle (ISP)
 
-> "Clients should not be forced to depend on interfaces they do not use."
+> "客户端不应被强制依赖它们不使用的接口。"
 
-### Violation
+### 违反
 
 ```java
-// ❌ BAD: Fat interface forces unnecessary implementations
+// ❌ 坏：胖接口强制不必要的实现
 public interface Worker {
     void work();
     void eat();
@@ -380,29 +380,29 @@ public interface Worker {
     void writeReport();
 }
 
-// Robot can't eat or sleep!
+// Robot 不能吃或睡！
 public class Robot implements Worker {
     @Override public void work() { /* OK */ }
-    @Override public void eat() { /* Can't eat! */ }
-    @Override public void sleep() { /* Can't sleep! */ }
+    @Override public void eat() { /* 不能吃！*/ }
+    @Override public void sleep() { /* 不能睡！*/ }
     @Override public void attendMeeting() { /* OK */ }
-    @Override public void writeReport() { /* Maybe */ }
+    @Override public void writeReport() { /* 也许 */ }
 }
 
-// Intern doesn't attend meetings or write reports
+// Intern 不参加会议或写报告
 public class Intern implements Worker {
     @Override public void work() { /* OK */ }
     @Override public void eat() { /* OK */ }
     @Override public void sleep() { /* OK */ }
-    @Override public void attendMeeting() { /* Not allowed! */ }
-    @Override public void writeReport() { /* Not expected! */ }
+    @Override public void attendMeeting() { /* 不允许！*/ }
+    @Override public void writeReport() { /* 不预期！*/ }
 }
 ```
 
-### Refactored
+### 重构后
 
 ```java
-// ✅ GOOD: Segregated interfaces
+// ✅ 好：分离的接口
 
 public interface Workable {
     void work();
@@ -418,7 +418,7 @@ public interface Manageable {
     void writeReport();
 }
 
-// Combine what you need
+// 组合你需要的东西
 public class Employee implements Workable, Feedable, Manageable {
     @Override public void work() { /* ... */ }
     @Override public void eat() { /* ... */ }
@@ -429,31 +429,31 @@ public class Employee implements Workable, Feedable, Manageable {
 
 public class Robot implements Workable {
     @Override public void work() { /* ... */ }
-    // No unnecessary methods!
+    // 没有不必要的方法！
 }
 
 public class Intern implements Workable, Feedable {
     @Override public void work() { /* ... */ }
     @Override public void eat() { /* ... */ }
     @Override public void sleep() { /* ... */ }
-    // No meeting/report methods!
+    // 没有会议/报告方法！
 }
 ```
 
-### How to Detect ISP Violations
+### 如何检测 ISP 违反
 
-- Implementations with empty methods or `throw new UnsupportedOperationException()`
-- Interface has 10+ methods
-- Different clients use completely different subsets of methods
-- Changes to interface affect unrelated implementations
+- 实现包含空方法或 `throw new UnsupportedOperationException()`
+- 接口有 10+ 个方法
+- 不同客户端使用完全不同的方法子集
+- 接口更改影响不相关的实现
 
-### Java Standard Library Violations
+### Java 标准库违反
 
 ```java
-// java.util.List has many methods - but this is acceptable for collections
-// However, be careful with your own interfaces!
+// java.util.List 有很多方法 - 但这对于集合是可以接受的
+// 但是，对你自己的接口要小心！
 
-// ❌ This interface is too fat for most use cases
+// ❌ 这个接口对大多数用例来说太胖了
 public interface Repository<T> {
     T findById(Long id);
     List<T> findAll();
@@ -465,10 +465,10 @@ public interface Repository<T> {
     List<T> findAllById(Iterable<Long> ids);
     long count();
     boolean existsById(Long id);
-    // ... 20 more methods
+    // ... 还有 20 个方法
 }
 
-// ✅ Better: Split by use case
+// ✅ 更好：按用例拆分
 public interface ReadRepository<T> {
     Optional<T> findById(Long id);
     List<T> findAll();
@@ -484,19 +484,19 @@ public interface WriteRepository<T> {
 
 ## D - Dependency Inversion Principle (DIP)
 
-> "High-level modules should not depend on low-level modules. Both should depend on abstractions."
+> "高层模块不应依赖低层模块。两者都应依赖抽象。"
 
-### Violation
+### 违反
 
 ```java
-// ❌ BAD: High-level depends on low-level directly
+// ❌ 坏：高层直接依赖低层
 public class OrderService {
-    private MySqlOrderRepository repository;  // Concrete class!
-    private SmtpEmailSender emailSender;      // Concrete class!
+    private MySqlOrderRepository repository;  // 具体类！
+    private SmtpEmailSender emailSender;      // 具体类！
 
     public OrderService() {
-        this.repository = new MySqlOrderRepository();  // Hard dependency
-        this.emailSender = new SmtpEmailSender();      // Hard dependency
+        this.repository = new MySqlOrderRepository();  // 硬依赖
+        this.emailSender = new SmtpEmailSender();      // 硬依赖
     }
 
     public void createOrder(Order order) {
@@ -506,17 +506,17 @@ public class OrderService {
 }
 ```
 
-**Problems:**
-- Cannot test without real MySQL database
-- Cannot swap email provider
-- OrderService knows about MySQL, SMTP details
+**问题：**
+- 没有真实的 MySQL 数据库无法测试
+- 无法交换 email provider
+- OrderService 知道 MySQL、SMTP 细节
 
-### Refactored
+### 重构后
 
 ```java
-// ✅ GOOD: Depend on abstractions
+// ✅ 好：依赖抽象
 
-// Abstractions (interfaces)
+// 抽象（接口）
 public interface OrderRepository {
     void save(Order order);
     Optional<Order> findById(Long id);
@@ -526,12 +526,12 @@ public interface NotificationSender {
     void send(String recipient, String message);
 }
 
-// High-level module depends on abstractions
+// 高层模块依赖抽象
 public class OrderService {
     private final OrderRepository repository;
     private final NotificationSender notificationSender;
 
-    // Dependencies injected
+    // 依赖注入
     public OrderService(OrderRepository repository,
                         NotificationSender notificationSender) {
         this.repository = repository;
@@ -544,21 +544,21 @@ public class OrderService {
     }
 }
 
-// Low-level modules implement abstractions
+// 低层模块实现抽象
 public class MySqlOrderRepository implements OrderRepository {
     @Override
-    public void save(Order order) { /* MySQL specific */ }
+    public void save(Order order) { /* MySQL 特定 */ }
 
     @Override
-    public Optional<Order> findById(Long id) { /* MySQL specific */ }
+    public Optional<Order> findById(Long id) { /* MySQL 特定 */ }
 }
 
 public class SmtpEmailSender implements NotificationSender {
     @Override
-    public void send(String recipient, String message) { /* SMTP specific */ }
+    public void send(String recipient, String message) { /* SMTP 特定 */ }
 }
 
-// Easy to test with mocks!
+// 易于使用 mock 测试！
 public class InMemoryOrderRepository implements OrderRepository {
     private Map<Long, Order> orders = new HashMap<>();
 
@@ -574,17 +574,17 @@ public class InMemoryOrderRepository implements OrderRepository {
 }
 ```
 
-### DIP with Spring
+### Spring 中的 DIP
 
 ```java
-// Spring handles dependency injection automatically
+// Spring 自动处理依赖注入
 
 @Service
 public class OrderService {
     private final OrderRepository repository;
     private final NotificationSender notificationSender;
 
-    // Constructor injection (recommended)
+    // 构造器注入（推荐）
     public OrderService(OrderRepository repository,
                         NotificationSender notificationSender) {
         this.repository = repository;
@@ -594,7 +594,7 @@ public class OrderService {
 
 @Repository
 public class JpaOrderRepository implements OrderRepository {
-    // Spring provides implementation
+    // Spring 提供实现
 }
 
 @Component
@@ -606,43 +606,43 @@ public class SmtpEmailSender implements NotificationSender { }
 public class MockEmailSender implements NotificationSender { }
 ```
 
-### How to Detect DIP Violations
+### 如何检测 DIP 违反
 
-- `new ConcreteClass()` inside business logic
-- Import statements include implementation packages (e.g., `com.mysql`, `org.apache.http`)
-- Cannot easily swap implementations
-- Tests require real infrastructure (database, network)
+- 业务逻辑内部的 `new ConcreteClass()`
+- Import 语句包含实现包（例如 `com.mysql`、`org.apache.http`）
+- 难以交换实现
+- 测试需要真实基础设施（数据库、网络）
 
 ---
 
-## SOLID Review Checklist
+## SOLID 审查清单
 
-When reviewing code, check:
+审查代码时，检查：
 
-| Principle | Question |
+| Principle | 问题 |
 |-----------|----------|
-| **SRP** | Does this class have more than one reason to change? |
-| **OCP** | Will adding a new type/feature require modifying this class? |
-| **LSP** | Can subclasses be used wherever parent is expected? |
-| **ISP** | Are there empty or throwing method implementations? |
-| **DIP** | Does high-level code depend on concrete implementations? |
+| **SRP** | 这个类是否有多个变更原因？ |
+| **OCP** | 添加新类型/功能是否需要修改此类？ |
+| **LSP** | 子类是否可以在父类期望的地方使用？ |
+| **ISP** | 是否有空或抛出的方法实现？ |
+| **DIP** | 高层代码是否依赖具体实现？ |
 
 ---
 
-## Common Refactoring Patterns
+## 常见重构模式
 
-| Violation | Refactoring |
+| 违反 | 重构 |
 |-----------|-------------|
-| SRP - God class | Extract Class, Move Method |
-| OCP - Type switching | Strategy Pattern, Factory |
-| LSP - Broken inheritance | Composition over Inheritance, Extract Interface |
-| ISP - Fat interface | Split Interface, Role Interface |
-| DIP - Hard dependencies | Dependency Injection, Abstract Factory |
+| SRP - 上帝类 | 提取类、移动方法 |
+| OCP - 类型切换 | Strategy 模式、Factory |
+| LSP - 破坏的继承 | 组合优于继承、提取接口 |
+| ISP - 胖接口 | 拆分接口、角色接口 |
+| DIP - 硬依赖 | 依赖注入、抽象工厂 |
 
 ---
 
-## Related Skills
+## 相关技能
 
-- `design-patterns` - Implementation patterns (Factory, Strategy, Observer, etc.)
-- `clean-code` - Code-level principles (DRY, KISS, naming)
-- `java-code-review` - Comprehensive review checklist
+- `design-patterns` - 实现模式（Factory、Strategy、Observer 等）
+- `clean-code` - 代码级原则（DRY、KISS、命名）
+- `java-code-review` - 全面审查清单
