@@ -1,164 +1,164 @@
 ---
 name: concurrency-review
-description: 审查 Java 并发代码的线程安全性、竞态条件、死锁和现代模式。当用户询问 "check thread safety" for thread safety, race conditions, deadlocks, and modern patterns (Virtual Threads, CompletableFuture, @Async). Use when user asks "check thread safety", "concurrency review", "async code review", or when reviewing multi-threaded code.
+description: 审查 Java 并发代码的线程安全性、竞态条件、死锁和现代模式（Virtual Threads、CompletableFuture、@Async）。当用户询问 "check thread safety"、"concurrency review"、"async code review" 或审查多线程代码时使用。
 ---
 
-# Concurrency Review Skill
+# Concurrency Review 技能
 
-Review Java concurrent code for correctness, safety, and modern best practices.
+审查 Java 并发代码的正确性、安全性和现代最佳实践。
 
-## Why This Matters
+## 为什么重要
 
-> Nearly 60% of multithreaded applications encounter issues due to improper management of shared resources. - ACM Study
+> 近 60% 的多线程应用程序由于共享资源管理不当而遇到问题。 - ACM 研究
 
-Concurrency bugs are:
-- **Hard to reproduce** - timing-dependent
-- **Hard to test** - may only appear under load
-- **Hard to debug** - non-deterministic behavior
+并发 bugs 是：
+- **难以重现** - 依赖时序
+- **难以测试** - 可能仅在负载下出现
+- **难以调试** - 非确定性行为
 
-This skill helps catch issues **before** they reach production.
+此技能帮助在问题到达生产环境**之前**捕获它们。
 
-## When to Use
-- Reviewing code with `synchronized`, `volatile`, `Lock`
-- Checking `@Async`, `CompletableFuture`, `ExecutorService`
-- Validating thread safety of shared state
-- Reviewing Virtual Threads / Structured Concurrency code
-- Any code accessed by multiple threads
+## 何时使用
+- 审查包含 `synchronized`、`volatile`、`Lock` 的代码
+- 检查 `@Async`、`CompletableFuture`、`ExecutorService`
+- 验证共享状态的线程安全性
+- 审查 Virtual Threads / Structured Concurrency 代码
+- 任何被多个线程访问的代码
 
 ---
 
-## Modern Java (21/25): Virtual Threads
+## 现代 Java (21/25)：Virtual Threads
 
-### When to Use Virtual Threads
+### 何时使用 Virtual Threads
 
 ```java
-// ✅ Perfect for I/O-bound tasks (HTTP, DB, file I/O)
+// ✅ 完美用于 I/O 密集型任务（HTTP、DB、文件 I/O）
 try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
     for (Request request : requests) {
         executor.submit(() -> callExternalApi(request));
     }
 }
 
-// ❌ Not beneficial for CPU-bound tasks
-// Use platform threads / ForkJoinPool instead
+// ❌ 对 CPU 密集型任务没有好处
+// 改用 platform threads / ForkJoinPool
 ```
 
-**Rule of thumb**: If your app never has 10,000+ concurrent tasks, virtual threads may not provide significant benefit.
+**经验法则**：如果你的应用从未有 10,000+ 并发任务，virtual threads 可能不会提供显著好处。
 
-### Java 25: Synchronized Pinning Fixed
+### Java 25：Synchronized Pinning 已修复
 
-In Java 21-23, virtual threads became "pinned" when entering `synchronized` blocks with blocking operations. **Java 25 fixes this** (JEP 491).
+在 Java 21-23 中，virtual threads 在进入带有阻塞操作的 `synchronized` 块时会被 "pinned"（固定）。**Java 25 修复了这个问题**（JEP 491）。
 
 ```java
-// In Java 21-23: ⚠️ Could cause pinning
+// 在 Java 21-23 中：⚠️ 可能导致 pinning
 synchronized (lock) {
-    blockingIoCall();  // Virtual thread pinned to carrier
+    blockingIoCall();  // Virtual thread 被固定到 carrier
 }
 
-// In Java 25: ✅ No longer an issue
-// But consider ReentrantLock for explicit control anyway
+// 在 Java 25 中：✅ 不再是问题
+// 但无论如何考虑使用 ReentrantLock 进行显式控制
 ```
 
-### ScopedValue Over ThreadLocal
+### ScopedValue 优于 ThreadLocal
 
 ```java
-// ❌ ThreadLocal problematic with virtual threads
+// ❌ ThreadLocal 在 virtual threads 中有问题
 private static final ThreadLocal<User> currentUser = new ThreadLocal<>();
 
-// ✅ ScopedValue (Java 21+ preview, improved in 25)
+// ✅ ScopedValue（Java 21+ preview，25 中改进）
 private static final ScopedValue<User> CURRENT_USER = ScopedValue.newInstance();
 
 ScopedValue.where(CURRENT_USER, user).run(() -> {
-    // CURRENT_USER.get() available here and in child virtual threads
+    // CURRENT_USER.get() 在此处和子 virtual threads 中可用
     processRequest();
 });
 ```
 
-### Structured Concurrency (Java 25 Preview)
+### Structured Concurrency（Java 25 Preview）
 
 ```java
-// ✅ Structured concurrency - tasks tied to scope lifecycle
+// ✅ 结构化并发 - 任务绑定到 scope 生命周期
 try (StructuredTaskScope.ShutdownOnFailure scope = new StructuredTaskScope.ShutdownOnFailure()) {
     Subtask<User> userTask = scope.fork(() -> fetchUser(id));
     Subtask<Orders> ordersTask = scope.fork(() -> fetchOrders(id));
 
-    scope.join();            // Wait for all
-    scope.throwIfFailed();   // Propagate exceptions
+    scope.join();            // 等待所有
+    scope.throwIfFailed();   // 传播异常
 
     return new Profile(userTask.get(), ordersTask.get());
 }
-// All subtasks automatically cancelled if scope exits
+// 如果 scope 退出，所有子任务自动取消
 ```
 
 ---
 
-## Spring @Async Pitfalls
+## Spring @Async 陷阱
 
-### 1. Forgetting @EnableAsync
+### 1. 忘记 @EnableAsync
 
 ```java
-// ❌ @Async silently ignored
+// ❌ @Async 被静默忽略
 @Service
 public class EmailService {
     @Async
     public void sendEmail(String to) { }
 }
 
-// ✅ Enable async processing
+// ✅ 启用异步处理
 @Configuration
 @EnableAsync
 public class AsyncConfig { }
 ```
 
-### 2. Calling Async from Same Class
+### 2. 从同一类调用 Async 方法
 
 ```java
 @Service
 public class OrderService {
 
-    // ❌ Bypasses proxy - runs synchronously!
+    // ❌ 绕过代理 - 同步运行！
     public void processOrder(Order order) {
-        sendConfirmation(order);  // Direct call, not async
+        sendConfirmation(order);  // 直接调用，非异步
     }
 
     @Async
     public void sendConfirmation(Order order) { }
 }
 
-// ✅ Inject self or use separate service
+// ✅ 注入 self 或使用单独的 service
 @Service
 public class OrderService {
     @Autowired
-    private EmailService emailService;  // Separate bean
+    private EmailService emailService;  // 单独的 bean
 
     public void processOrder(Order order) {
-        emailService.sendConfirmation(order);  // Proxy call, async works
+        emailService.sendConfirmation(order);  // 代理调用，异步工作
     }
 }
 ```
 
-### 3. @Async on Non-Public Methods
+### 3. 非公共方法上的 @Async
 
 ```java
-// ❌ Non-public methods - proxy can't intercept
+// ❌ 非公共方法 - 代理无法拦截
 @Async
 private void processInBackground() { }
 
 @Async
 protected void processInBackground() { }
 
-// ✅ Must be public
+// ✅ 必须是 public
 @Async
 public void processInBackground() { }
 ```
 
-### 4. Default Executor Creates Thread Per Task
+### 4. 默认 Executor 为每个任务创建线程
 
 ```java
-// ❌ Default SimpleAsyncTaskExecutor - creates new thread each time!
-// Can cause OutOfMemoryError under load
+// ❌ 默认 SimpleAsyncTaskExecutor - 每次都创建新线程！
+// 可能在负载下导致 OutOfMemoryError
 
-// ✅ Configure proper thread pool
+// ✅ 配置正确的线程池
 @Configuration
 @EnableAsync
 public class AsyncConfig {
@@ -177,44 +177,44 @@ public class AsyncConfig {
 }
 ```
 
-### 5. SecurityContext Not Propagating
+### 5. SecurityContext 不传播
 
 ```java
-// ❌ SecurityContextHolder is ThreadLocal-bound
+// ❌ SecurityContextHolder 绑定到 ThreadLocal
 @Async
 public void auditAction() {
-    // SecurityContextHolder.getContext() is NULL here!
+    // SecurityContextHolder.getContext() 此处为 NULL！
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
 }
 
-// ✅ Use DelegatingSecurityContextAsyncTaskExecutor
+// ✅ 使用 DelegatingSecurityContextAsyncTaskExecutor
 @Bean
 public Executor taskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    // ... configure ...
+    // ... 配置 ...
     return new DelegatingSecurityContextAsyncTaskExecutor(executor);
 }
 ```
 
 ---
 
-## CompletableFuture Patterns
+## CompletableFuture 模式
 
-### Error Handling
+### 错误处理
 
 ```java
-// ❌ Exception silently swallowed
+// ❌ 异常被静默吞掉
 CompletableFuture.supplyAsync(() -> riskyOperation());
-// If riskyOperation throws, nobody knows
+// 如果 riskyOperation 抛出异常，没人知道
 
-// ✅ Always handle exceptions
+// ✅ 始终处理异常
 CompletableFuture.supplyAsync(() -> riskyOperation())
     .exceptionally(ex -> {
         log.error("Operation failed", ex);
         return fallbackValue;
     });
 
-// ✅ Or use handle() for both success and failure
+// ✅ 或使用 handle() 处理成功和失败
 CompletableFuture.supplyAsync(() -> riskyOperation())
     .handle((result, ex) -> {
         if (ex != null) {
@@ -225,129 +225,129 @@ CompletableFuture.supplyAsync(() -> riskyOperation())
     });
 ```
 
-### Timeout Handling (Java 9+)
+### 超时处理（Java 9+）
 
 ```java
-// ✅ Fail after timeout
+// ✅ 超时后失败
 CompletableFuture.supplyAsync(() -> slowOperation())
-    .orTimeout(5, TimeUnit.SECONDS);  // Throws TimeoutException
+    .orTimeout(5, TimeUnit.SECONDS);  // 抛出 TimeoutException
 
-// ✅ Return default after timeout
+// ✅ 超时后返回默认值
 CompletableFuture.supplyAsync(() -> slowOperation())
     .completeOnTimeout(defaultValue, 5, TimeUnit.SECONDS);
 ```
 
-### Combining Futures
+### 组合 Futures
 
 ```java
-// ✅ Wait for all
+// ✅ 等待所有
 CompletableFuture.allOf(future1, future2, future3)
     .thenRun(() -> log.info("All completed"));
 
-// ✅ Wait for first
+// ✅ 等待第一个
 CompletableFuture.anyOf(future1, future2, future3)
     .thenAccept(result -> log.info("First result: {}", result));
 
-// ✅ Combine results
+// ✅ 组合结果
 future1.thenCombine(future2, (r1, r2) -> merge(r1, r2));
 ```
 
-### Use Appropriate Executor
+### 使用适当的 Executor
 
 ```java
-// ❌ CPU-bound task in ForkJoinPool.commonPool (default)
+// ❌ CPU 密集型任务在 ForkJoinPool.commonPool（默认）中
 CompletableFuture.supplyAsync(() -> cpuIntensiveWork());
 
-// ✅ Custom executor for blocking/I/O operations
+// ✅ 用于阻塞/I/O 操作的自定义 executor
 ExecutorService ioExecutor = Executors.newFixedThreadPool(20);
 CompletableFuture.supplyAsync(() -> blockingIoCall(), ioExecutor);
 
-// ✅ In Java 21+, virtual threads for I/O
+// ✅ 在 Java 21+ 中，用于 I/O 的 virtual threads
 ExecutorService virtualExecutor = Executors.newVirtualThreadPerTaskExecutor();
 CompletableFuture.supplyAsync(() -> blockingIoCall(), virtualExecutor);
 ```
 
 ---
 
-## Classic Concurrency Issues
+## 经典并发问题
 
-### Race Conditions: Check-Then-Act
+### 竞态条件：Check-Then-Act
 
 ```java
-// ❌ Race condition
+// ❌ 竞态条件
 if (!map.containsKey(key)) {
-    map.put(key, computeValue());  // Another thread may have added it
+    map.put(key, computeValue());  // 另一个线程可能已经添加了它
 }
 
-// ✅ Atomic operation
+// ✅ 原子操作
 map.computeIfAbsent(key, k -> computeValue());
 
-// ❌ Race condition with counter
+// ❌ 计数器的竞态条件
 if (count < MAX) {
-    count++;  // Read-check-write is not atomic
+    count++;  // 读-检查-写不是原子的
 }
 
-// ✅ Atomic counter
+// ✅ 原子计数器
 AtomicInteger count = new AtomicInteger();
 count.updateAndGet(c -> c < MAX ? c + 1 : c);
 ```
 
-### Visibility: Missing volatile
+### 可见性：缺少 volatile
 
 ```java
-// ❌ Other threads may never see the update
+// ❌ 其他线程可能永远看不到更新
 private boolean running = true;
 
 public void stop() {
-    running = false;  // May not be visible to other threads
+    running = false;  // 可能对其他线程不可见
 }
 
 public void run() {
-    while (running) { }  // May loop forever
+    while (running) { }  // 可能永远循环
 }
 
-// ✅ Volatile ensures visibility
+// ✅ Volatile 确保可见性
 private volatile boolean running = true;
 ```
 
-### Non-Atomic long/double
+### 非原子的 long/double
 
 ```java
-// ❌ 64-bit read/write is non-atomic on 32-bit JVMs
+// ❌ 在 32 位 JVM 上 64 位读/写是非原子的
 private long counter;
 
 public void increment() {
-    counter++;  // Not atomic!
+    counter++;  // 非原子！
 }
 
-// ✅ Use AtomicLong or synchronization
+// ✅ 使用 AtomicLong 或同步
 private AtomicLong counter = new AtomicLong();
 
-// ✅ Or volatile (for single-writer scenarios)
+// ✅ 或使用 volatile（用于单写入者场景）
 private volatile long counter;
 ```
 
-### Double-Checked Locking
+### 双重检查锁定
 
 ```java
-// ❌ Broken without volatile
+// ❌ 没有 volatile 会损坏
 private static Singleton instance;
 
 public static Singleton getInstance() {
     if (instance == null) {
         synchronized (Singleton.class) {
             if (instance == null) {
-                instance = new Singleton();  // May be seen partially constructed
+                instance = new Singleton();  // 可能被看到部分构造
             }
         }
     }
     return instance;
 }
 
-// ✅ Correct with volatile
+// ✅ 使用 volatile 正确
 private static volatile Singleton instance;
 
-// ✅ Or use holder class idiom
+// ✅ 或使用 holder 类惯用法
 private static class Holder {
     static final Singleton INSTANCE = new Singleton();
 }
@@ -357,29 +357,29 @@ public static Singleton getInstance() {
 }
 ```
 
-### Deadlocks: Lock Ordering
+### 死锁：锁定顺序
 
 ```java
-// ❌ Potential deadlock
+// ❌ 潜在死锁
 // Thread 1: lock(A) -> lock(B)
 // Thread 2: lock(B) -> lock(A)
 
 public void transfer(Account from, Account to, int amount) {
     synchronized (from) {
         synchronized (to) {
-            // Transfer logic
+            // 转账逻辑
         }
     }
 }
 
-// ✅ Consistent lock ordering
+// ✅ 一致的锁定顺序
 public void transfer(Account from, Account to, int amount) {
     Account first = from.getId() < to.getId() ? from : to;
     Account second = from.getId() < to.getId() ? to : from;
 
     synchronized (first) {
         synchronized (second) {
-            // Transfer logic
+            // 转账逻辑
         }
     }
 }
@@ -387,86 +387,86 @@ public void transfer(Account from, Account to, int amount) {
 
 ---
 
-## Thread-Safe Collections
+## 线程安全集合
 
-### Choose the Right Collection
+### 选择正确的集合
 
-| Use Case | Wrong | Right |
+| Use Case | 错误 | 正确 |
 |----------|-------|-------|
-| Concurrent reads/writes | `HashMap` | `ConcurrentHashMap` |
-| Frequent iteration | `ConcurrentHashMap` | `CopyOnWriteArrayList` |
-| Producer-consumer | `ArrayList` | `BlockingQueue` |
-| Sorted concurrent | `TreeMap` | `ConcurrentSkipListMap` |
+| 并发读/写 | `HashMap` | `ConcurrentHashMap` |
+| 频繁迭代 | `ConcurrentHashMap` | `CopyOnWriteArrayList` |
+| 生产者-消费者 | `ArrayList` | `BlockingQueue` |
+| 排序并发 | `TreeMap` | `ConcurrentSkipListMap` |
 
-### ConcurrentHashMap Pitfalls
+### ConcurrentHashMap 陷阱
 
 ```java
-// ❌ Non-atomic compound operation
+// ❌ 非原子复合操作
 if (!map.containsKey(key)) {
     map.put(key, value);
 }
 
-// ✅ Atomic
+// ✅ 原子
 map.putIfAbsent(key, value);
 map.computeIfAbsent(key, k -> createValue());
 
-// ❌ Nested compute can deadlock
+// ❌ 嵌套 compute 可能死锁
 map.compute(key1, (k, v) -> {
-    return map.compute(key2, ...);  // Deadlock risk!
+    return map.compute(key2, ...);  // 死锁风险！
 });
 ```
 
 ---
 
-## Concurrency Review Checklist
+## 并发审查清单
 
-### 🔴 High Severity (Likely Bugs)
-- [ ] No check-then-act on shared state without synchronization
-- [ ] No `synchronized` calling external/unknown code (deadlock risk)
-- [ ] `volatile` present for double-checked locking
-- [ ] Non-volatile fields not read in loops waiting for updates
-- [ ] `ConcurrentHashMap.compute()` doesn't call other map operations
-- [ ] @Async methods are public and called from different beans
+### 🔴 高严重性（可能的 Bugs）
+- [ ] 没有同步的共享状态上的 check-then-act
+- [ ] 没有同步调用外部/未知代码（死锁风险）
+- [ ] 双重检查锁定中有 `volatile`
+- [ ] 非 volatile 字段在等待更新的循环中读取
+- [ ] `ConcurrentHashMap.compute()` 不调用其他 map 操作
+- [ ] @Async 方法是 public 并从不同的 bean 调用
 
-### 🟡 Medium Severity (Potential Issues)
-- [ ] Thread pools properly sized and named
-- [ ] CompletableFuture exceptions handled (exceptionally/handle)
-- [ ] SecurityContext propagated to async tasks if needed
-- [ ] `ExecutorService` properly shut down
-- [ ] `Lock.unlock()` in finally block
-- [ ] Thread-safe collections used for shared data
+### 🟡 中等严重性（潜在问题）
+- [ ] 线程池正确调整大小和命名
+- [ ] CompletableFuture 异常已处理（exceptionally/handle）
+- [ ] SecurityContext 传播到异步任务（如果需要）
+- [ ] `ExecutorService` 正确关闭
+- [ ] `Lock.unlock()` 在 finally 块中
+- [ ] 共享数据使用线程安全集合
 
-### 🟢 Modern Patterns (Java 21/25)
-- [ ] Virtual threads used for I/O-bound concurrent tasks
-- [ ] ScopedValue considered over ThreadLocal
-- [ ] Structured concurrency for related subtasks
-- [ ] Timeouts on CompletableFuture operations
+### 🟢 现代模式（Java 21/25）
+- [ ] Virtual threads 用于 I/O 密集型并发任务
+- [ ] 考虑 ScopedValue 而非 ThreadLocal
+- [ ] 结构化并发用于相关子任务
+- [ ] CompletableFuture 操作的超时
 
-### 📝 Documentation
-- [ ] Thread safety documented on shared classes
-- [ ] Locking order documented for nested locks
-- [ ] Each `volatile` usage justified
+### 📝 文档
+- [ ] 共享类的线程安全性已记录
+- [ ] 嵌套锁的锁定顺序已记录
+- [ ] 每个 `volatile` 使用都有理由
 
 ---
 
-## Analysis Commands
+## 分析命令
 
 ```bash
-# Find synchronized blocks
+# 查找 synchronized 块
 grep -rn "synchronized" --include="*.java"
 
-# Find @Async methods
+# 查找 @Async 方法
 grep -rn "@Async" --include="*.java"
 
-# Find volatile fields
+# 查找 volatile 字段
 grep -rn "volatile" --include="*.java"
 
-# Find thread pool creation
+# 查找线程池创建
 grep -rn "Executors\.\|ThreadPoolExecutor\|ExecutorService" --include="*.java"
 
-# Find CompletableFuture without error handling
+# 查找没有错误处理的 CompletableFuture
 grep -rn "CompletableFuture\." --include="*.java" | grep -v "exceptionally\|handle\|whenComplete"
 
-# Find ThreadLocal (consider ScopedValue in Java 21+)
+# 查找 ThreadLocal（在 Java 21+ 中考虑 ScopedValue）
 grep -rn "ThreadLocal" --include="*.java"
 ```

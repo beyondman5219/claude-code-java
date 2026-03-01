@@ -1,32 +1,32 @@
 ---
 name: spring-boot-patterns
-description: Spring Boot 应用程序的最佳实践和模式。当创建 controllers、services、repositories 或用户询问 Spring Boot 架构时使用. Use when creating controllers, services, repositories, or when user asks about Spring Boot architecture, REST APIs, exception handling, or JPA patterns.
+description: Spring Boot 应用程序的最佳实践和模式。当创建 controllers、services、repositories 或用户询问 Spring Boot 架构、REST APIs、异常处理或 JPA 模式时使用。
 ---
 
-# Spring Boot Patterns Skill
+# Spring Boot Patterns 技能
 
-Best practices and patterns for Spring Boot applications.
+Spring Boot 应用程序的最佳实践和模式。
 
-## When to Use
-- User says "create controller" / "add service" / "Spring Boot help"
-- Reviewing Spring Boot code
-- Setting up new Spring Boot project structure
+## 何时使用
+- 用户说 "create controller" / "add service" / "Spring Boot help"
+- 审查 Spring Boot 代码
+- 设置新的 Spring Boot 项目结构
 
-## Project Structure
+## 项目结构
 
 ```
 src/main/java/com/example/myapp/
 ├── MyAppApplication.java          # @SpringBootApplication
-├── config/                        # Configuration classes
+├── config/                        # 配置类
 │   ├── SecurityConfig.java
 │   └── WebConfig.java
 ├── controller/                    # REST controllers
 │   └── UserController.java
-├── service/                       # Business logic
+├── service/                       # 业务逻辑
 │   ├── UserService.java
 │   └── impl/
 │       └── UserServiceImpl.java
-├── repository/                    # Data access
+├── repository/                    # 数据访问
 │   └── UserRepository.java
 ├── model/                         # Entities
 │   └── User.java
@@ -35,22 +35,22 @@ src/main/java/com/example/myapp/
 │   │   └── CreateUserRequest.java
 │   └── response/
 │       └── UserResponse.java
-├── exception/                     # Custom exceptions
+├── exception/                     # 自定义异常
 │   ├── ResourceNotFoundException.java
 │   └── GlobalExceptionHandler.java
-└── util/                          # Utilities
+└── util/                          # 工具类
     └── DateUtils.java
 ```
 
 ---
 
-## Controller Patterns
+## Controller 模式
 
-### REST Controller Template
+### REST Controller 模板
 ```java
 @RestController
 @RequestMapping("/api/v1/users")
-@RequiredArgsConstructor  // Lombok for constructor injection
+@RequiredArgsConstructor  // Lombok 用于构造器注入
 public class UserController {
 
     private final UserService userService;
@@ -91,26 +91,26 @@ public class UserController {
 }
 ```
 
-### Controller Best Practices
+### Controller 最佳实践
 
 | Practice | Example |
 |----------|---------|
-| Versioned API | `/api/v1/users` |
-| Plural nouns | `/users` not `/user` |
-| HTTP methods | GET=read, POST=create, PUT=update, DELETE=delete |
-| Status codes | 200=OK, 201=Created, 204=NoContent, 404=NotFound |
-| Validation | `@Valid` on request body |
+| 版本化 API | `/api/v1/users` |
+| 复数名词 | `/users` 而非 `/user` |
+| HTTP 方法 | GET=读、POST=创建、PUT=更新、DELETE=删除 |
+| 状态码 | 200=OK、201=Created、204=NoContent、404=NotFound |
+| 验证 | 请求体上的 `@Valid` |
 
-### ❌ Anti-patterns
+### ❌ 反模式
 ```java
-// ❌ Business logic in controller
+// ❌ Controller 中的业务逻辑
 @PostMapping
 public User create(@RequestBody User user) {
-    user.setCreatedAt(LocalDateTime.now());  // Logic belongs in service
-    return userRepository.save(user);         // Direct repo access
+    user.setCreatedAt(LocalDateTime.now());  // 逻辑属于 service
+    return userRepository.save(user);         // 直接访问 repo
 }
 
-// ❌ Returning entity directly (exposes internals)
+// ❌ 直接返回 entity（暴露内部实现）
 @GetMapping("/{id}")
 public User getById(@PathVariable Long id) {
     return userRepository.findById(id).get();
@@ -119,9 +119,9 @@ public User getById(@PathVariable Long id) {
 
 ---
 
-## Service Patterns
+## Service 模式
 
-### Service Interface + Implementation
+### Service 接口 + 实现
 ```java
 // Interface
 public interface UserService {
@@ -135,7 +135,7 @@ public interface UserService {
 // Implementation
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)  // Default read-only
+@Transactional(readOnly = true)  // 默认只读
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -156,7 +156,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional  // Write transaction
+    @Transactional  // 写事务
     public UserResponse create(CreateUserRequest request) {
         User user = userMapper.toEntity(request);
         User saved = userRepository.save(user);
@@ -174,59 +174,59 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-### Service Best Practices
+### Service 最佳实践
 
-- Interface + Impl for testability
-- `@Transactional(readOnly = true)` at class level
-- `@Transactional` for write methods
-- Throw domain exceptions, not generic ones
-- Use mappers (MapStruct) for entity ↔ DTO conversion
+- Interface + Impl 以提高可测试性
+- 类级别的 `@Transactional(readOnly = true)`
+- 写方法使用 `@Transactional`
+- 抛出领域异常，而非通用异常
+- 使用 mappers（MapStruct）进行 entity ↔ DTO 转换
 
 ---
 
-## Repository Patterns
+## Repository 模式
 
 ### JPA Repository
 ```java
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Derived query
+    // 派生查询
     Optional<User> findByEmail(String email);
 
     List<User> findByActiveTrue();
 
-    // Custom query
+    // 自定义查询
     @Query("SELECT u FROM User u WHERE u.department.id = :deptId")
     List<User> findByDepartmentId(@Param("deptId") Long departmentId);
 
-    // Native query (use sparingly)
+    // Native query（谨慎使用）
     @Query(value = "SELECT * FROM users WHERE created_at > :date",
            nativeQuery = true)
     List<User> findRecentUsers(@Param("date") LocalDate date);
 
-    // Exists check (more efficient than findBy)
+    // 存在性检查（比 findBy 更高效）
     boolean existsByEmail(String email);
 
-    // Count
+    // 计数
     long countByActiveTrue();
 }
 ```
 
-### Repository Best Practices
+### Repository 最佳实践
 
-- Use derived queries when possible
-- `Optional` for single results
-- `existsBy` instead of `findBy` for existence checks
-- Avoid native queries unless necessary
-- Use `@EntityGraph` for fetch optimization
+- 尽可能使用派生查询
+- 单结果使用 `Optional`
+- 存在性检查使用 `existsBy` 而非 `findBy`
+- 避免原生查询，除非必要
+- 使用 `@EntityGraph` 进行 fetch 优化
 
 ---
 
-## DTO Patterns
+## DTO 模式
 
 ### Request/Response DTOs
 ```java
-// Request DTO with validation
+// 带验证的 Request DTO
 public record CreateUserRequest(
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100)
@@ -267,9 +267,9 @@ public interface UserMapper {
 
 ---
 
-## Exception Handling
+## 异常处理
 
-### Custom Exceptions
+### 自定义异常
 ```java
 public class ResourceNotFoundException extends RuntimeException {
 
@@ -289,7 +289,7 @@ public class BusinessException extends RuntimeException {
 }
 ```
 
-### Global Exception Handler
+### 全局异常处理器
 ```java
 @RestControllerAdvice
 @Slf4j
@@ -325,7 +325,7 @@ public record ErrorResponse(String code, String message) {}
 
 ---
 
-## Configuration Patterns
+## 配置模式
 
 ### Application Properties
 ```yaml
@@ -337,7 +337,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate  # Never 'create' in production!
+      ddl-auto: validate  # 生产环境中绝不要用 'create'！
     show-sql: false
 
 app:
@@ -346,7 +346,7 @@ app:
     expiration: 86400000
 ```
 
-### Configuration Properties Class
+### Configuration Properties 类
 ```java
 @Configuration
 @ConfigurationProperties(prefix = "app.jwt")
@@ -363,37 +363,37 @@ public class JwtProperties {
 }
 ```
 
-### Profile-Specific Configuration
+### Profile 特定配置
 ```
 src/main/resources/
-├── application.yml           # Common config
-├── application-dev.yml       # Development
-├── application-test.yml      # Testing
-└── application-prod.yml      # Production
+├── application.yml           # 通用配置
+├── application-dev.yml       # 开发环境
+├── application-test.yml      # 测试环境
+└── application-prod.yml      # 生产环境
 ```
 
 ---
 
-## Common Annotations Quick Reference
+## 常用注解快速参考
 
-| Annotation | Purpose |
+| Annotation | 用途 |
 |------------|---------|
-| `@RestController` | REST controller (combines @Controller + @ResponseBody) |
-| `@Service` | Business logic component |
-| `@Repository` | Data access component |
-| `@Configuration` | Configuration class |
-| `@RequiredArgsConstructor` | Lombok: constructor injection |
-| `@Transactional` | Transaction management |
-| `@Valid` | Trigger validation |
-| `@ConfigurationProperties` | Bind properties to class |
-| `@Profile("dev")` | Profile-specific bean |
-| `@Scheduled` | Scheduled tasks |
+| `@RestController` | REST controller（结合 @Controller + @ResponseBody） |
+| `@Service` | 业务逻辑组件 |
+| `@Repository` | 数据访问组件 |
+| `@Configuration` | 配置类 |
+| `@RequiredArgsConstructor` | Lombok：构造器注入 |
+| `@Transactional` | 事务管理 |
+| `@Valid` | 触发验证 |
+| `@ConfigurationProperties` | 绑定属性到类 |
+| `@Profile("dev")` | Profile 特定 bean |
+| `@Scheduled` | 定时任务 |
 
 ---
 
-## Testing Patterns
+## 测试模式
 
-### Controller Test (MockMvc)
+### Controller 测试（MockMvc）
 ```java
 @WebMvcTest(UserController.class)
 class UserControllerTest {
@@ -416,7 +416,7 @@ class UserControllerTest {
 }
 ```
 
-### Service Test
+### Service 测试
 ```java
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -440,7 +440,7 @@ class UserServiceImplTest {
 }
 ```
 
-### Integration Test
+### 集成测试
 ```java
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -467,13 +467,13 @@ class UserIntegrationTest {
 
 ---
 
-## Quick Reference Card
+## 快速参考卡
 
-| Layer | Responsibility | Annotations |
+| Layer | 职责 | 注解 |
 |-------|---------------|-------------|
-| Controller | HTTP handling, validation | `@RestController`, `@Valid` |
-| Service | Business logic, transactions | `@Service`, `@Transactional` |
-| Repository | Data access | `@Repository`, extends `JpaRepository` |
-| DTO | Data transfer | Records with validation annotations |
-| Config | Configuration | `@Configuration`, `@ConfigurationProperties` |
-| Exception | Error handling | `@RestControllerAdvice` |
+| Controller | HTTP 处理、验证 | `@RestController`、`@Valid` |
+| Service | 业务逻辑、事务 | `@Service`、`@Transactional` |
+| Repository | 数据访问 | `@Repository`、extends `JpaRepository` |
+| DTO | 数据传输 | 带验证注解的 Records |
+| Config | 配置 | `@Configuration`、`@ConfigurationProperties` |
+| Exception | 错误处理 | `@RestControllerAdvice` |
