@@ -1,22 +1,22 @@
-# Claude Code Configuration for {{PROJECT_NAME}}
+# Claude Code {{PROJECT_NAME}} 配置
 
-> AI-powered development workspace configuration
+> AI 驱动的开发工作区配置
 
-## Available Skills
+## 可用技能
 
-Skills are loaded from `.claude/skills/` (symlinked from claude-code-java).
+技能从 `.claude/skills/` 加载（从 claude-code-java 符号链接）。
 
-To use a skill, load it first, then invoke with natural language:
+要使用技能，先加载它，然后用自然语言调用：
 
-### 1. Git Commit Messages
-**Load**: `view .claude/skills/git-commit/SKILL.md`
+### 1. Git Commit 消息
+**加载**：`view .claude/skills/git-commit/SKILL.md`
 
-**Use cases**:
+**使用场景**：
 - "Commit staged changes"
 - "Create commit for bug fix #123"
 - "Generate conventional commit message"
 
-**Example**:
+**示例**：
 ```
 > view .claude/skills/git-commit/SKILL.md
 > "Commit these changes"
@@ -24,183 +24,183 @@ To use a skill, load it first, then invoke with natural language:
 ```
 
 ### 2. Test Quality (JUnit 5 + AssertJ)
-**Load**: `view .claude/skills/test-quality/SKILL.md`
+**加载**：`view .claude/skills/test-quality/SKILL.md`
 
-**Use cases**:
+**使用场景**：
 - "Add tests for PluginManager.loadAll()"
 - "Review existing tests in PluginLoaderTest"
 - "Improve test coverage for lifecycle module"
 
-**Example**:
+**示例**：
 ```
 > view .claude/skills/test-quality/SKILL.md
 > "Add unit tests for ExtensionFactory with edge cases"
-→ Generates JUnit 5 tests with AssertJ assertions
+→ 生成 JUnit 5 测试及 AssertJ 断言
 ```
 
 ### 3. Issue Triage
-**Load**: `view .claude/skills/issue-triage/SKILL.md`
+**加载**：`view .claude/skills/issue-triage/SKILL.md`
 
-**Use cases**:
+**使用场景**：
 - "Triage the last 10 issues"
 - "Check recent bug reports"
 - "Prioritize open feature requests"
 
-**Example**:
+**示例**：
 ```
 > view .claude/skills/issue-triage/SKILL.md
 > "Triage issues from {{REPO_NAME}}, last 15"
-→ Categorizes, labels, suggests responses
+→ 分类、标记、建议响应
 ```
 
-## MCP Servers (Optional)
+## MCP 服务器（可选）
 
-MCP servers enhance capabilities with structured, token-efficient operations:
+MCP 服务器通过结构化的、token 高效的操作增强功能：
 
-| Server | Benefits |
+| Server | 好处 |
 |--------|----------|
-| GitHub MCP | Issue management, PR creation |
-| Filesystem MCP | Structured file tree navigation |
-| Git MCP | Commit history, blame, log parsing |
+| GitHub MCP | Issue 管理、PR 创建 |
+| Filesystem MCP | 结构化文件树导航 |
+| Git MCP | Commit 历史、blame、日志解析 |
 
-To configure MCP servers, run from claude-code-java:
+要配置 MCP 服务器，从 claude-code-java 运行：
 ```bash
 ./scripts/configure-mcp.sh /path/to/this/project
 ```
 
-See [MCP documentation](https://modelcontextprotocol.io/) for details.
+详情见 [MCP 文档](https://modelcontextprotocol.io/)。
 
-## Common Workflows
+## 常见工作流
 
-### Daily Development Flow
+### 日常开发流程
 ```bash
-# 1. Start session
+# 1. 启动会话
 claude code .
 
-# 2. Work on feature/fix
-# ... make code changes ...
+# 2. 开发功能/修复
+# ... 进行代码更改 ...
 
-# 3. Add tests (load test-quality skill)
+# 3. 添加测试（加载 test-quality skill）
 > view .claude/skills/test-quality/SKILL.md
 > "Add tests for new functionality in class X"
 
-# 4. Commit (load git-commit skill)
+# 4. 提交（加载 git-commit skill）
 > view .claude/skills/git-commit/SKILL.md
 > "Commit staged changes"
 
-# 5. Push and create PR
+# 5. 推送并创建 PR
 > "Push changes and create PR for issue #123"
 ```
 
-### Weekly Maintenance
+### 每周维护
 ```bash
-# Monday morning: Issue triage
+# 周一早上：Issue 分类
 claude code .
 
 > view .claude/skills/issue-triage/SKILL.md
 > "Triage the last 20 issues, categorize and prioritize"
 
-# Review suggested actions
+# 审查建议的操作
 > "Apply labels and post responses as suggested"
 ```
 
-### Code Review
+### 代码审查
 ```bash
-# Review PR
+# 审查 PR
 > "Review PR #456 focusing on:
    - Test coverage (use test-quality skill)
    - Commit message quality (use git-commit skill)
    - Code patterns and best practices"
 ```
 
-## Token Budget Guidelines
+## Token 预算指南
 
-To optimize token usage:
+优化 token 使用：
 
-1. **Load skills once per session** - Skills stay in context
-2. **Batch operations** - Process multiple issues/tests together
-3. **Use MCP when available** - More efficient than bash commands
-4. **Targeted file reads** - Only read files you need
+1. **每会话加载一次技能** - 技能保持在上下文中
+2. **批量操作** - 一起处理多个 issues/tests
+3. **使用 MCP（如果可用）** - 比 bash 命令更高效
+4. **定向文件读取** - 仅读取需要的文件
 
-### Target Token Usage
+### 目标 Token 使用
 
-| Task | Without Skills | With Skills | Savings |
+| Task | 不使用技能 | 使用技能 | 节省 |
 |------|----------------|-------------|---------|
 | Commit message | ~800 tokens | ~300 tokens | 62% |
-| Add 3 tests | ~2000 tokens | ~800 tokens | 60% |
-| Triage 10 issues | ~5000 tokens | ~2000 tokens | 60% |
+| 添加 3 个测试 | ~2000 tokens | ~800 tokens | 60% |
+| 分类 10 个 issues | ~5000 tokens | ~2000 tokens | 60% |
 
-## What to Avoid
+## 避免事项
 
-1. **Don't reload skills repeatedly** - Load once per session
-2. **Don't process issues one-by-one** - Batch them
-3. **Don't over-engineer** - Use skills for appropriate tasks
-4. **Don't ignore skill guidelines** - They're optimized for tokens
+1. **不要重复加载技能** - 每会话加载一次
+2. **不要逐个处理 issues** - 批量处理
+3. **不要过度设计** - 在适当任务上使用技能
+4. **不要忽略技能指南** - 它们针对 token 进行了优化
 
-## Project-Specific Notes
+## 项目特定说明
 
-### Build Commands
+### 构建命令
 ```bash
 # Maven
 mvn clean install
 mvn test
 mvn jacoco:report
 
-# Check test coverage
+# 检查测试覆盖率
 open target/site/jacoco/index.html
 ```
 
-### Testing Strategy
-- Target: 80%+ coverage on core logic
-- Focus: Business logic, not boilerplate
-- Tools: JUnit 5, AssertJ, Mockito
+### 测试策略
+- 目标：核心逻辑 80%+ 覆盖率
+- 重点：业务逻辑，非样板代码
+- 工具：JUnit 5、AssertJ、Mockito
 
-### Commit Guidelines
-- Follow Conventional Commits
-- Reference issues: "Fixes #123"
-- Keep subject under 50 chars
+### 提交指南
+- 遵循 Conventional Commits
+- 引用 issues："Fixes #123"
+- 主题保持在 50 字符以内
 
-### Issue Management
-- Label all new issues within 48h
-- Respond to questions within 1 week
-- Close stale (>90 days, no activity) issues
+### Issue 管理
+- 48 小时内标记所有新 issues
+- 1 周内回复问题
+- 关闭陈旧（>90 天无活动）issues
 
-## Resources
+## 资源
 
-- [claude-code-java](https://github.com/decebals/claude-code-java) - Skill repository
-- [Claude Code Docs](https://code.claude.com/docs) - Official documentation
-- [Conventional Commits](https://www.conventionalcommits.org/) - Commit format
-- [AssertJ Docs](https://assertj.github.io/doc/) - Assertion library
+- [claude-code-java](https://github.com/decebals/claude-code-java) - 技能仓库
+- [Claude Code Docs](https://code.claude.com/docs) - 官方文档
+- [Conventional Commits](https://www.conventionalcommits.org/) - 提交格式
+- [AssertJ Docs](https://assertj.github.io/doc/) - 断言库
 
-## Tips & Tricks
+## 技巧
 
-### Quick skill loading
+### 快速技能加载
 ```bash
-# Add to your shell alias
+# 添加到 shell 别名
 alias cc-commit='echo "view .claude/skills/git-commit/SKILL.md"'
 alias cc-test='echo "view .claude/skills/test-quality/SKILL.md"'
 alias cc-triage='echo "view .claude/skills/issue-triage/SKILL.md"'
 ```
 
-### Session continuity
+### 会话连续性
 ```bash
-# Save context at end of session
+# 会话结束时保存上下文
 > "Summarize what we worked on today for next session"
 
-# Resume next day
+# 第二天恢复
 > "Review yesterday's summary and continue"
 ```
 
-### Measure your wins
+### 衡量胜利
 ```bash
-# Track token usage
+# 跟踪 token 使用
 > /token usage
 
-# Compare before/after adopting skills
-# Document savings in team retrospectives
+# 比较采用技能前后的情况
+# 在团队回顾中记录节省
 ```
 
 ---
 
-**Last updated**: {{DATE}}
-**claude-code-java version**: v0.1
+**最后更新**：{{DATE}}
+**claude-code-java 版本**：v0.1

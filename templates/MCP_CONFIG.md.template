@@ -1,50 +1,50 @@
-# MCP Configuration Instructions
+# MCP 配置说明
 
-This file explains how to configure Model Context Protocol (MCP) servers
-for your project. It is generated from a template and tailored for each project.
+此文件解释如何为项目配置 Model Context Protocol (MCP) 服务器。
+它是从模板生成的，为每个项目定制。
 
 ---
 
-## 1. Local Filesystem MCP
+## 1. 本地文件系统 MCP
 
-- **Purpose**: Allows Claude Code to navigate the project file tree efficiently
-- **Root directory**: {{PROJECT_ROOT}}
-- **Server command**:
+- **用途**：允许 Claude Code 高效导航项目文件树
+- **根目录**：{{PROJECT_ROOT}}
+- **服务器命令**：
 ```bash
 npx @modelcontextprotocol/server-filesystem --path "{{PROJECT_ROOT}}"
 ```
 
-## 2. GitHub MCP (optional)
-- **Purpose**: Efficient issue management, pull request creation, and repository analysis
-- **Repository**: {{GITHUB_REPO}}
-- **Required**: GITHUB_TOKEN environment variable
+## 2. GitHub MCP（可选）
+- **用途**：高效的 issue 管理、PR 创建和仓库分析
+- **仓库**：{{GITHUB_REPO}}
+- **必需**：GITHUB_TOKEN 环境变量
 
 ```bash
 export GITHUB_TOKEN=<your-token>
 ```
-- **Add MCP server command**:
+- **添加 MCP 服务器命令**：
 ```
 claude mcp add github --transport http "{{GITHUB_REPO}}"
 ```
-⚠️ If `GITHUB_TOKEN` is not set, GitHub MCP will not work.
+⚠️ 如果未设置 `GITHUB_TOKEN`，GitHub MCP 将无法工作。
 
-## 3. Local Git MCP (optional)
-- **Purpose**: Analyze commit history, blame, logs.
-- **Root directory**: {{PROJECT_ROOT}}
-- **Server command**:
+## 3. 本地 Git MCP（可选）
+- **用途**：分析 commit 历史、blame、日志
+- **根目录**：{{PROJECT_ROOT}}
+- **服务器命令**：
 ```bash
 npx @modelcontextprotocol/server-git --path "{{PROJECT_ROOT}}"
 ```
 
-## Best Practices
-1. Load skills once per session - avoids unnecessary token usage
-2. Batch operations - process multiple files/issues together
-3. Use MCP whenever possible - more efficient than shell commands
-4. Keep this file updated - helps onboarding new contributors
+## 最佳实践
+1. 每会话加载技能一次 - 避免不必要的 token 使用
+2. 批量操作 - 一起处理多个文件/issues
+3. 尽可能使用 MCP - 比 shell 命令更高效
+4. 保持此文件更新 - 帮助新贡献者入职
 
-**Notes**:
+**注意**：
 
-- Replace `<your-token>` with a valid GitHub Personal Access Token (PAT).
-- For more info on creating a PAT and setting up MCP, see:
+- 将 `<your-token>` 替换为有效的 GitHub Personal Access Token (PAT)。
+- 有关创建 PAT 和设置 MCP 的更多信息，请参阅：
   - [GitHub Docs: Personal Access Tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
   - [Model Context Protocol Docs](https://modelcontextprotocol.io/docs/getting-started/intro)
