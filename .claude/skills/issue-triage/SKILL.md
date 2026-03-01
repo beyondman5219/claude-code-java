@@ -1,136 +1,136 @@
 ---
 name: issue-triage
-description: 对 GitHub issues 进行分类和优先级标记。当用户说 "triage issues" with priority labels. Use when user says "triage issues", "check issues", "review open issues", or during regular maintenance of GitHub issue backlog.
+description: 对 GitHub issues 进行分类和优先级标记。当用户说 "triage issues"、"check issues"、"review open issues" 或定期维护 GitHub issue backlog 时使用。
 ---
 
-# Issue Triage Skill
+# Issue Triage 技能
 
-Efficiently triage GitHub issues for Java projects with categorization and prioritization.
+高效地对 Java 项目的 GitHub issues 进行分类、确定优先级。
 
-## When to Use
-- User says "triage issues" / "check recent issues"
-- Regular maintenance workflow
-- After vacation/break (backlog processing)
-- Weekly/monthly issue review
+## 何时使用
+- 用户说 "triage issues" / "check recent issues"
+- 定期维护工作流
+- 假期/休息后（backlog 处理）
+- 每周/每月 issue 审查
 
-## Prerequisites
+## 前提条件
 
-**Recommended**: GitHub MCP server configured for optimal token usage
+**推荐**：配置 GitHub MCP server 以获得最佳 token 使用
 ```bash
 claude mcp add github --transport http \
   https://api.githubcopilot.com/mcp/
 ```
 
-**Alternative**: Use `gh` CLI (less token-efficient)
+**替代方案**：使用 `gh` CLI（token 效率较低）
 
-## Workflow
+## 工作流
 
-### 1. Fetch Issues
+### 1. 获取 Issues
 
-**With GitHub MCP** (recommended):
+**使用 GitHub MCP**（推荐）：
 ```
 Tool: list_issues
 Parameters: {
   "state": "open",
-  "sort": "updated", 
+  "sort": "updated",
   "per_page": 10
 }
 ```
 
-**With gh CLI**:
+**使用 gh CLI**：
 ```bash
 gh issue list --state open --limit 10 --json number,title,labels,body,url
 ```
 
-### 2. Categorize Each Issue
+### 2. 分类每个 Issue
 
-Analyze issue content and assign category:
+分析 issue 内容并分配类别：
 
 #### Bug Report ✅
-**Indicators**:
-- Has stack trace or error message
-- Steps to reproduce provided
-- Expected vs actual behavior described
-- Mentions specific version numbers
+**指标**：
+- 有堆栈跟踪或错误消息
+- 提供了重现步骤
+- 描述了预期 vs 实际行为
+- 提到特定版本号
 
-**Actions**:
-- Label: `bug`
-- Verify reproducibility from description
-- Check for duplicate bugs
-- Add to milestone if critical
+**操作**：
+- 标记：`bug`
+- 从描述验证可重现性
+- 检查重复 bugs
+- 如果关键则添加到 milestone
 
-**Example**:
+**示例**：
 ```
 Issue #234: "NPE when loading plugin from directory"
 - Stack trace: ✅
 - Reproduction steps: ✅
 - Version info: ✅
-→ Label: bug, high-priority
+→ 标记: bug, high-priority
 ```
 
 #### Feature Request 💡
-**Indicators**:
-- Asks for new functionality
-- Use case described
+**指标**：
+- 要求新功能
+- 描述了用例
 - "It would be nice if..." / "Could you add..."
-- Rationale provided
+- 提供了理由
 
-**Actions**:
-- Label: `enhancement`
-- Assess alignment with project goals
-- Mark for discussion if non-trivial
-- Ask for community feedback
+**操作**：
+- 标记：`enhancement`
+- 评估与项目目标的一致性
+- 如果非平凡则标记为讨论
+- 请求社区反馈
 
 #### Question/Support ❓
-**Indicators**:
+**指标**：
 - "How do I..." / "Can someone help..."
-- Configuration/usage questions
-- Not a bug or feature request
+- 配置/使用问题
+- 不是 bug 或功能请求
 
-**Actions**:
-- Label: `question`
-- Provide answer or link to docs
-- Suggest StackOverflow for complex help
-- Close after answer if resolved
+**操作**：
+- 标记：`question`
+- 提供答案或链接到文档
+- 建议复杂问题使用 StackOverflow
+- 解决后关闭
 
 #### Duplicate 🔄
-**Search for similar issues**:
-- Use GitHub search: `is:issue <keywords>`
-- Check recently closed issues
-- Look for same error messages
+**搜索类似 issues**：
+- 使用 GitHub search：`is:issue <keywords>`
+- 检查最近关闭的 issues
+- 查找相同的错误消息
 
-**Actions**:
-- Link to original: "Duplicate of #123"
-- Close with polite comment
-- Ask reporter to comment on original if they have additional info
+**操作**：
+- 链接到原始："Duplicate of #123"
+- 带有礼貌评论关闭
+- 如果报告人有额外信息，请他们在原始 issue 上评论
 
 #### Invalid/Unclear ⚠️
-**Indicators**:
-- Missing critical information
-- Off-topic or spam
-- Not enough context to proceed
+**指标**：
+- 缺少关键信息
+- 离题或垃圾信息
+- 没有足够的上下文继续
 
-**Actions**:
-- Request clarification with template
-- Set "needs-more-info" label
-- Auto-close if no response after 14 days
+**操作**：
+- 使用模板请求澄清
+- 设置 "needs-more-info" 标记
+- 如果 14 天后无响应则自动关闭
 
-### 3. Priority Assessment
+### 3. 优先级评估
 
 #### Critical (P0) 🔴
-**Criteria**:
-- Security vulnerability
-- Data loss/corruption risk
-- Complete functionality breakdown
-- Affects production systems
+**标准**：
+- 安全漏洞
+- 数据丢失/损坏风险
+- 完全功能故障
+- 影响生产系统
 
-**Actions**:
-- Label: `critical`
-- Notify maintainers immediately
-- Add to current milestone
-- Consider hotfix release
+**操作**：
+- 标记：`critical`
+- 立即通知维护者
+- 添加到当前 milestone
+- 考虑 hotfix 发布
 
-**Examples**:
+**示例**：
 ```
 - "SQL injection vulnerability in plugin loader"
 - "All plugins fail to load after upgrade"
@@ -138,64 +138,64 @@ Issue #234: "NPE when loading plugin from directory"
 ```
 
 #### High (P1) 🟠
-**Criteria**:
-- Core feature broken
-- Affects many users
-- Workaround exists but painful
-- Regression from previous version
+**标准**：
+- 核心功能损坏
+- 影响许多用户
+- 存在变通方法但很痛苦
+- 以前版本的回归
 
-**Actions**:
-- Label: `high-priority`
-- Add to next milestone
-- Include in release notes
+**操作**：
+- 标记：`high-priority`
+- 添加到下一个 milestone
+- 包含在发布说明中
 
-**Examples**:
+**示例**：
 ```
 - "Plugin dependencies not resolved correctly"
 - "Hot reload crashes application"
 ```
 
 #### Medium (P2) 🟡
-**Criteria**:
-- Edge case bug
-- Enhancement with clear value
-- Documentation gap
-- Affects some users occasionally
+**标准**：
+- 边缘情况 bug
+- 有明确价值的增强
+- 文档缺失
+- 偶尔影响一些用户
 
-**Actions**:
-- Label: `medium-priority`
-- Consider for future milestone
-- Good for contributors
+**操作**：
+- 标记：`medium-priority`
+- 考虑用于未来 milestone
+- 适合贡献者
 
-**Examples**:
+**示例**：
 ```
 - "Improve error message for invalid plugin"
 - "Add plugin lifecycle listener"
 ```
 
 #### Low (P3) 🟢
-**Criteria**:
-- Nice-to-have feature
-- Cosmetic issues
-- Very rare edge case
-- Documentation improvements
+**标准**：
+- 最好有的功能
+- 外观问题
+- 非常罕见的边缘情况
+- 文档改进
 
-**Actions**:
-- Label: `low-priority`
-- "Contributions welcome" tag
-- Backlog for future
+**操作**：
+- 标记：`low-priority`
+- "Contributions welcome" 标记
+- Backlog 供将来使用
 
-**Examples**:
+**示例**：
 ```
 - "Add more examples to README"
 - "Typo in JavaDoc"
 ```
 
-### 4. Response Templates
+### 4. 响应模板
 
-#### Need More Information
+#### 需要更多信息
 ```markdown
-Thanks for reporting this issue! 
+Thanks for reporting this issue!
 
 To investigate further, could you provide:
 - Java version (java -version)
@@ -207,29 +207,29 @@ To investigate further, could you provide:
 This will help us diagnose and fix the issue faster.
 ```
 
-#### Duplicate
+#### 重复
 ```markdown
 Thanks for reporting! This is being tracked in #123.
 
-Closing as duplicate. Feel free to add any additional context 
+Closing as duplicate. Feel free to add any additional context
 or information to the original issue.
 ```
 
-#### Won't Fix (with rationale)
+#### 不予修复（附理由）
 ```markdown
-Thank you for the suggestion. After consideration, this doesn't 
+Thank you for the suggestion. After consideration, this doesn't
 align with the project's current direction because [reason].
 
-Consider [alternative approach] instead, which might better 
+Consider [alternative approach] instead, which might better
 serve your use case.
 
-If you feel strongly about this, please open a discussion in 
+If you feel strongly about this, please open a discussion in
 our [forum/discussions] to gather community feedback.
 ```
 
-#### Acknowledged Bug
+#### 确认的 Bug
 ```markdown
-Confirmed! This is a valid bug. 
+Confirmed! This is a valid bug.
 
 I've added it to milestone X.Y and labeled it as [priority].
 Contributions welcome if anyone wants to tackle it!
@@ -240,12 +240,12 @@ Reproduction verified with:
 - Ubuntu 22.04
 ```
 
-#### Feature Request - Under Consideration
+#### 功能请求 - 考虑中
 ```markdown
 Interesting idea! This aligns with our goal of [project goal].
 
 I've labeled this as 'enhancement' for further discussion.
-Community feedback welcome - upvote with 👍 if you'd find 
+Community feedback welcome - upvote with 👍 if you'd find
 this useful.
 
 Some questions to consider:
@@ -253,7 +253,7 @@ Some questions to consider:
 - [question 2]
 ```
 
-#### Question Answered
+#### 问题已回答
 ```markdown
 To achieve this, you can [solution].
 
@@ -267,95 +267,95 @@ Also check our documentation: [link]
 Let me know if this solves your issue!
 ```
 
-## Token Optimization Strategies
+## Token 优化策略
 
-### Batch Processing
+### 批量处理
 ```bash
-# Process multiple issues in one prompt
+# 在一个提示中处理多个 issues
 "Triage issues #234-243, categorize and prioritize"
 ```
 
-**Savings**: ~60% fewer tokens vs one-by-one
+**节省**：与逐个处理相比节省约 60% tokens
 
-### Use Structured GitHub MCP Calls
-- One call to list issues → cache results
-- Targeted calls for details only when needed
-- Batch label updates
+### 使用结构化的 GitHub MCP 调用
+- 一次调用列出 issues → 缓存结果
+- 仅在需要时进行细节定向调用
+- 批量更新标记
 
-**Savings**: ~40% fewer tokens vs repeated bash calls
+**节省**：与重复 bash 调用相比节省约 40% tokens
 
-### Cache Issue List
+### 缓存 Issue 列表
 ```bash
-# First prompt
+# 第一个提示
 "Fetch the last 20 issues, save list in memory"
 
-# Subsequent prompts
+# 后续提示
 "Analyze issue #5 from cached list"
 "Mark #7-#9 as duplicate"
 ```
 
-### Focus on First Post + Recent Comments
-- Don't read entire 50-comment threads
-- Skim first post for context
-- Check last 2-3 comments for updates
+### 专注于首条评论 + 最近评论
+- 不要阅读整个 50 条评论的线程
+- 浏览首条评论获取上下文
+- 检查最后 2-3 条评论的更新
 
-## Anti-patterns
+## 反模式
 
-❌ **Avoid**:
+❌ **避免**：
 ```
-# One-by-one processing
+# 逐个处理
 "Check issue #234"
 "Now check issue #235"
 "Now check issue #236"
-→ Wastes tokens on repeated context loading
+→ 在重复上下文加载上浪费 tokens
 
-# Over-analyzing
-Reading entire 100-comment thread
-Checking all related PRs
-Deep diving into code for each issue
-→ Diminishing returns after certain point
+# 过度分析
+阅读整个 100 条评论的线程
+检查所有相关的 PR
+为每个 issue 深入代码
+→ 超过某一点后收益递减
 
-# Premature closing
-Closing issues without proper investigation
-Missing duplicates due to poor search
-→ Frustrates users, creates duplicate work
+# 过早关闭
+未经适当调查关闭 issues
+由于搜索不当而遗漏重复
+→ 挫败用户，创建重复工作
 ```
 
-✅ **Prefer**:
+✅ **首选**：
 ```
-# Batch operations
+# 批量操作
 "Triage issues #234-250, categorize, prioritize"
 
-# Quick triage decisions
-Fast categorization → Can revisit if needed
-Surface-level analysis for most issues
-Deep dive only for critical/complex ones
+# 快速分类决策
+快速分类 → 如需要可以重新访问
+大多数 issues 进行表面分析
+仅对关键/复杂的进行深入分析
 
-# Thorough duplicate search
-Quick keyword search before marking duplicate
-Link to specific comment if clarification exists
+# 彻底的重复搜索
+在标记重复之前进行快速关键词搜索
+如果存在澄清，链接到特定评论
 ```
 
-## Automation Opportunities
+## 自动化机会
 
-### Auto-close stale issues
+### 自动关闭陈旧 issues
 ```bash
-# Issues with no activity for 90 days and "needs-more-info" label
-"Find stale issues (>90 days, needs-more-info label), 
+# 90 天无活动且带有 "needs-more-info" 标记的 issues
+"Find stale issues (>90 days, needs-more-info label),
 suggest closing with polite message"
 ```
 
-### Label by keywords
+### 按关键词标记
 ```bash
-# Auto-label based on content
+# 基于内容自动标记
 "java.lang.NullPointerException" → bug
 "add support for" → enhancement
 "how do I" → question
 ```
 
-### Weekly summary
+### 每周摘要
 ```bash
-# Generate triage summary
+# 生成分类摘要
 "Summarize issues from last week:
 - New bugs: X
 - Feature requests: Y
@@ -363,39 +363,39 @@ suggest closing with polite message"
 - Closed: W"
 ```
 
-## Integration with GitHub
+## 与 GitHub 集成
 
-### With GitHub MCP
+### 使用 GitHub MCP
 ```javascript
-// Structured workflow
-1. list_issues → get open issues
-2. get_issue → details for each
-3. add_labels → categorize
-4. create_comment → respond
-5. close_issue → if needed
+// 结构化工作流
+1. list_issues → 获取 open issues
+2. get_issue → 每个的详细信息
+3. add_labels → 分类
+4. create_comment → 响应
+5. close_issue → 如果需要
 ```
 
-### With gh CLI
+### 使用 gh CLI
 ```bash
-# List issues
+# 列出 issues
 gh issue list --json number,title,labels,body
 
-# View specific issue
+# 查看特定 issue
 gh issue view 234
 
-# Add labels
+# 添加标记
 gh issue edit 234 --add-label "bug,high-priority"
 
-# Comment
+# 评论
 gh issue comment 234 --body "Thanks for reporting..."
 
-# Close
+# 关闭
 gh issue close 234 --comment "Fixed in v2.1"
 ```
 
-## Metrics to Track
+## 要跟踪的指标
 
-After each triage session, report:
+每次分类会话后，报告：
 
 ```
 📊 Triage Summary
@@ -417,34 +417,34 @@ Time saved: ~45 minutes (vs manual)
 Token usage: 3,200 tokens
 ```
 
-## Best Practices
+## 最佳实践
 
-1. **Regular cadence** - Weekly triage prevents backlog
-2. **Be respectful** - Users took time to report
-3. **Link resources** - Docs, related issues, examples
-4. **Ask questions** - Better to clarify than assume
-5. **Welcome contributions** - Encourage community involvement
-6. **Track patterns** - Common issues suggest documentation gaps
-7. **Celebrate reporters** - Thank users for good bug reports
-8. **Close decisively** - Don't let issues linger indefinitely
+1. **定期节奏** - 每周分类防止 backlog
+2. **保持尊重** - 用户花时间报告
+3. **链接资源** - 文档、相关 issues、示例
+4. **询问问题** - 澄清比假设更好
+5. **欢迎贡献** - 鼓励社区参与
+6. **跟踪模式** - 常见问题表明文档缺失
+7. **表扬报告者** - 感谢用户的好 bug 报告
+8. **果断关闭** - 不要让 issues 无限期拖延
 
-## Example Workflow
+## 示例工作流
 
 ```bash
-# Monday morning triage
+# 周一早上分类
 claude code ~/projects/pf4j
 
 > view .claude/skills/issue-triage/SKILL.md
 > "Triage the last 15 issues from pf4j/pf4j,
-   categorize, prioritize and suggest responses"
+   categorize, prioritize and suggest responses
 
-[Claude analyzes and presents summary]
+[Claude 分析并展示摘要]
 
 > "Apply labels and post the suggested responses"
 
-[Claude executes actions]
+[Claude 执行操作]
 
 > "Generate summary for release notes"
 ```
 
-**Result**: 15 issues triaged in ~10 minutes vs ~45 minutes manual
+**结果**：15 个 issues 在约 10 分钟内完成分类，手动需要约 45 分钟
