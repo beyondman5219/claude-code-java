@@ -1,6 +1,6 @@
 ---
 name: java-migration
-description: Guide for upgrading Java projects between major versions (8→11→17→21→25). Use when user says "upgrade Java", "migrate to Java 25", "update Java version", or when modernizing legacy projects.
+description: 在主要 LTS 版本之间升级 Java 项目的分步指南（8→11→17→21→25）。当用户说 "upgrade Java" between major versions (8→11→17→21→25). Use when user says "upgrade Java", "migrate to Java 25", "update Java version", or when modernizing legacy projects.
 ---
 
 # Java Migration Skill

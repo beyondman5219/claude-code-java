@@ -1,36 +1,36 @@
 ---
 name: architecture-review
-description: Analyze Java project architecture at macro level - package structure, module boundaries, dependency direction, and layering. Use when user asks "review architecture", "check structure", "package organization", or when evaluating if a codebase follows clean architecture principles.
+description: 在宏观层面分析 Java 项目架构 - package 结构、模块边界、依赖方向和分层。当用户询问 "review architecture"、"check structure"、"package organization" 或评估代码库是否遵循 clean architecture 原则时使用。
 ---
 
-# Architecture Review Skill
+# Architecture Review 技能
 
-Analyze project structure at the macro level - packages, modules, layers, and boundaries.
+在宏观层面分析项目结构 - packages、modules、layers 和 boundaries。
 
-## When to Use
-- User asks "review the architecture" / "check project structure"
-- Evaluating package organization
-- Checking dependency direction between layers
-- Identifying architectural violations
-- Assessing clean/hexagonal architecture compliance
+## 何时使用
+- 用户询问 "review the architecture" / "check project structure"
+- 评估 package 组织
+- 检查层之间的依赖方向
+- 识别架构违规
+- 评估 clean/hexagonal architecture 合规性
 
 ---
 
-## Quick Reference: Architecture Smells
+## 快速参考：架构异味
 
-| Smell | Symptom | Impact |
+| 异味 | 症状 | 影响 |
 |-------|---------|--------|
-| Package-by-layer bloat | `service/` with 50+ classes | Hard to find related code |
-| Domain → Infra dependency | Entity imports `@Repository` | Core logic tied to framework |
-| Circular dependencies | A → B → C → A | Untestable, fragile |
-| God package | `util/` or `common/` growing | Dump for misplaced code |
-| Leaky abstractions | Controller knows SQL | Layer boundaries violated |
+| 按层分组的 package 膨胀 | `service/` 中有 50+ 个类 | 难以找到相关代码 |
+| Domain → Infra 依赖 | Entity 导入 `@Repository` | 核心逻辑绑定到框架 |
+| 循环依赖 | A → B → C → A | 不可测试、脆弱 |
+| 上帝 package | `util/` 或 `common/` 增长 | 错放代码的堆场 |
+| 泄漏的抽象 | Controller 知道 SQL | 层边界被违反 |
 
 ---
 
-## Package Organization Strategies
+## Package 组织策略
 
-### Package-by-Layer (Traditional)
+### Package-by-Layer（传统）
 
 ```
 com.example.app/
@@ -52,10 +52,10 @@ com.example.app/
     └── Product.java
 ```
 
-**Pros**: Familiar, simple for small projects
-**Cons**: Scatters related code, doesn't scale, hard to extract modules
+**优点**：熟悉、小型项目简单
+**缺点**：分散相关代码、不可扩展、难以提取模块
 
-### Package-by-Feature (Recommended)
+### Package-by-Feature（推荐）
 
 ```
 com.example.app/
@@ -76,24 +76,24 @@ com.example.app/
     └── Product.java
 ```
 
-**Pros**: Related code together, easy to extract, clear boundaries
-**Cons**: May need shared kernel for cross-cutting concerns
+**优点**：相关代码在一起、易于提取、清晰的边界
+**缺点**：横切关注点可能需要共享内核
 
 ### Hexagonal/Clean Architecture
 
 ```
 com.example.app/
-├── domain/                    # Pure business logic (no framework imports)
+├── domain/                    # 纯业务逻辑（无框架导入）
 │   ├── model/
 │   │   └── User.java
 │   ├── port/
-│   │   ├── in/               # Use cases (driven)
+│   │   ├── in/               # 用例（被驱动）
 │   │   │   └── CreateUserUseCase.java
-│   │   └── out/              # Repositories (driving)
+│   │   └── out/              # Repositories（驱动）
 │   │       └── UserRepository.java
 │   └── service/
 │       └── UserDomainService.java
-├── application/               # Use case implementations
+├── application/               # 用例实现
 │   └── CreateUserService.java
 ├── adapter/
 │   ├── in/
@@ -107,52 +107,52 @@ com.example.app/
     └── BeanConfiguration.java
 ```
 
-**Key rule**: Dependencies point inward (adapters → application → domain)
+**关键规则**：依赖指向内部（adapters → application → domain）
 
 ---
 
-## Dependency Direction Rules
+## 依赖方向规则
 
-### The Golden Rule
+### 黄金法则
 
 ```
 ┌─────────────────────────────────────────┐
-│              Frameworks                 │  ← Outer (volatile)
+│              Frameworks                 │  ← Outer（易变）
 ├─────────────────────────────────────────┤
 │           Adapters (Web, DB)            │
 ├─────────────────────────────────────────┤
 │         Application Services            │
 ├─────────────────────────────────────────┤
-│          Domain (Core Logic)            │  ← Inner (stable)
+│          Domain (Core Logic)            │  ← Inner（稳定）
 └─────────────────────────────────────────┘
 
-Dependencies MUST point inward only.
-Inner layers MUST NOT know about outer layers.
+依赖必须仅指向内部。
+内层绝不能了解外层。
 ```
 
-### Violations to Flag
+### 需要标记的违规
 
 ```java
-// ❌ Domain depends on infrastructure
+// ❌ Domain 依赖 infrastructure
 package com.example.domain.model;
 
-import org.springframework.data.jpa.repository.JpaRepository;  // Framework leak!
-import javax.persistence.Entity;  // JPA in domain!
+import org.springframework.data.jpa.repository.JpaRepository;  // 框架泄漏！
+import javax.persistence.Entity;  // Domain 中的 JPA！
 
 @Entity
 public class User {
-    // Domain polluted with persistence concerns
+    // Domain 被持久化关注点污染
 }
 
-// ❌ Domain depends on adapter
+// ❌ Domain 依赖 adapter
 package com.example.domain.service;
 
-import com.example.adapter.out.persistence.UserJpaRepository;  // Wrong direction!
+import com.example.adapter.out.persistence.UserJpaRepository;  // 错误的方向！
 
-// ✅ Domain defines port, adapter implements
+// ✅ Domain 定义 port，adapter 实现
 package com.example.domain.port.out;
 
-public interface UserRepository {  // Pure interface, no JPA
+public interface UserRepository {  // 纯接口，无 JPA
     User findById(UserId id);
     void save(User user);
 }
@@ -160,42 +160,42 @@ public interface UserRepository {  // Pure interface, no JPA
 
 ---
 
-## Architecture Review Checklist
+## 架构审查清单
 
-### 1. Package Structure
-- [ ] Clear organization strategy (by-layer, by-feature, or hexagonal)
-- [ ] Consistent naming across modules
-- [ ] No `util/` or `common/` packages growing unbounded
-- [ ] Feature packages are cohesive (related code together)
+### 1. Package 结构
+- [ ] 清晰的组织策略（按层、按功能或六边形）
+- [ ] 模块间命名一致
+- [ ] 没有 `util/` 或 `common/` packages 无界增长
+- [ ] 功能 packages 是内聚的（相关代码在一起）
 
-### 2. Dependency Direction
-- [ ] Domain has ZERO framework imports (Spring, JPA, Jackson)
-- [ ] Adapters depend on domain, not vice versa
-- [ ] No circular dependencies between packages
-- [ ] Clear dependency hierarchy
+### 2. 依赖方向
+- [ ] Domain 零框架导入（Spring、JPA、Jackson）
+- [ ] Adapters 依赖 domain，反之亦然
+- [ ] packages 之间没有循环依赖
+- [ ] 清晰的依赖层次结构
 
-### 3. Layer Boundaries
-- [ ] Controllers don't contain business logic
-- [ ] Services don't know about HTTP (no HttpServletRequest)
-- [ ] Repositories don't leak into controllers
-- [ ] DTOs at boundaries, domain objects inside
+### 3. 层边界
+- [ ] Controllers 不包含业务逻辑
+- [ ] Services 不知道 HTTP（没有 HttpServletRequest）
+- [ ] Repositories 不泄漏到 controllers
+- [ ] 边界使用 DTO，内部使用 domain 对象
 
-### 4. Module Boundaries
-- [ ] Each module has clear public API
-- [ ] Internal classes are package-private
-- [ ] Cross-module communication through interfaces
-- [ ] No "reaching across" modules for internals
+### 4. 模块边界
+- [ ] 每个模块有清晰的公共 API
+- [ ] 内部类是 package-private
+- [ ] 跨模块通信通过接口
+- [ ] 不"跨模块"访问内部
 
-### 5. Scalability Indicators
-- [ ] Could extract a feature to separate service? (microservice-ready)
-- [ ] Are boundaries enforced or just conventional?
-- [ ] Does adding a feature require touching many packages?
+### 5. 可扩展性指标
+- [ ] 可以提取功能到独立服务吗？（微服务就绪）
+- [ ] 边界是强制的还是仅是约定？
+- [ ] 添加功能是否需要触及多个 packages？
 
 ---
 
-## Common Anti-Patterns
+## 常见反模式
 
-### 1. The Big Ball of Mud
+### 1. 大泥球
 
 ```
 src/main/java/com/example/
@@ -206,12 +206,12 @@ src/main/java/com/example/
     ├── UserRepository.java
     ├── Order.java
     ├── OrderController.java
-    ├── ... (100+ files in one package)
+    ├── ...（一个 package 中 100+ 个文件）
 ```
 
-**Fix**: Introduce package structure (start with by-feature)
+**修复**：引入 package 结构（从按功能开始）
 
-### 2. The Util Dumping Ground
+### 2. Util 堆场
 
 ```
 util/
@@ -219,25 +219,25 @@ util/
 ├── DateUtils.java
 ├── ValidationUtils.java
 ├── SecurityUtils.java
-├── EmailUtils.java      # Should be in notification module
-├── OrderCalculator.java # Should be in order domain
-└── UserHelper.java      # Should be in user domain
+├── EmailUtils.java      # 应该在 notification 模块
+├── OrderCalculator.java # 应该在 order domain
+└── UserHelper.java      # 应该在 user domain
 ```
 
-**Fix**: Move domain logic to appropriate modules, keep only truly generic utils
+**修复**：将领域逻辑移动到适当的模块，仅保留真正的通用 utils
 
-### 3. Anemic Domain Model
+### 3. 贫血领域模型
 
 ```java
-// Domain object is just data
+// 领域对象只是数据
 public class Order {
     private Long id;
     private List<OrderLine> lines;
     private BigDecimal total;
-    // Only getters/setters, no behavior
+    // 只有 getters/setters，没有行为
 }
 
-// All logic in "service"
+// 所有逻辑在 "service" 中
 public class OrderService {
     public void addLine(Order order, Product product, int qty) { ... }
     public void calculateTotal(Order order) { ... }
@@ -245,9 +245,9 @@ public class OrderService {
 }
 ```
 
-**Fix**: Move behavior to domain objects (rich domain model)
+**修复**：将行为移动到领域对象（富领域模型）
 
-### 4. Framework Coupling in Domain
+### 4. Domain 中的框架耦合
 
 ```java
 package com.example.domain;
@@ -264,34 +264,34 @@ public class User {
 }
 ```
 
-**Fix**: Separate domain model from persistence/API models
+**修复**：分离领域模型与持久化/API 模型
 
 ---
 
-## Analysis Commands
+## 分析命令
 
-When reviewing architecture, examine:
+审查架构时，检查：
 
 ```bash
-# Package structure overview
+# Package 结构概览
 find src/main/java -type d | head -30
 
-# Largest packages (potential god packages)
+# 最大的 packages（潜在的上帝 packages）
 find src/main/java -name "*.java" | xargs dirname | sort | uniq -c | sort -rn | head -10
 
-# Check for framework imports in domain
+# 检查 domain 中的框架导入
 grep -r "import org.springframework" src/main/java/*/domain/ 2>/dev/null
 grep -r "import javax.persistence" src/main/java/*/domain/ 2>/dev/null
 
-# Find circular dependencies (look for bidirectional imports)
-# Check if package A imports from B and B imports from A
+# 查找循环依赖（查找双向导入）
+# 检查 package A 是否从 B 导入，B 是否从 A 导入
 ```
 
 ---
 
-## Recommendations Format
+## 建议格式
 
-When reporting findings:
+报告发现时：
 
 ```markdown
 ## Architecture Review: [Project Name]
@@ -304,25 +304,25 @@ When reporting findings:
 
 | Severity | Issue | Location | Recommendation |
 |----------|-------|----------|----------------|
-| High | Domain imports Spring | `domain/model/User.java` | Extract pure domain model |
-| Medium | God package | `util/` (23 classes) | Distribute to feature modules |
-| Low | Inconsistent naming | `service/` vs `services/` | Standardize to `service/` |
+| High | Domain 导入 Spring | `domain/model/User.java` | 提取纯领域模型 |
+| Medium | 上帝 package | `util/`（23 个类）| 分发到功能模块 |
+| Low | 命名不一致 | `service/` vs `services/` | 标准化为 `service/` |
 
 ### Dependency Analysis
-[Describe dependency flow, violations found]
+[描述依赖流、发现的违规]
 
 ### Recommendations
-1. [Highest priority fix]
-2. [Second priority]
-3. [Nice to have]
+1. [最高优先级修复]
+2. [次要优先级]
+3. [最好有]
 ```
 
 ---
 
-## Token Optimization
+## Token 优化
 
-For large codebases:
-1. Start with `find` to understand structure
-2. Check only domain package for framework imports
-3. Sample 2-3 features for pattern analysis
-4. Don't read every file - look for patterns
+对于大型代码库：
+1. 从 `find` 开始了解结构
+2. 仅检查 domain package 的框架导入
+3. 采样 2-3 个功能进行模式分析
+4. 不要读取每个文件 - 查找模式

@@ -1,6 +1,6 @@
 ---
 name: spring-boot-patterns
-description: Spring Boot best practices and patterns. Use when creating controllers, services, repositories, or when user asks about Spring Boot architecture, REST APIs, exception handling, or JPA patterns.
+description: Spring Boot 应用程序的最佳实践和模式。当创建 controllers、services、repositories 或用户询问 Spring Boot 架构时使用. Use when creating controllers, services, repositories, or when user asks about Spring Boot architecture, REST APIs, exception handling, or JPA patterns.
 ---
 
 # Spring Boot Patterns Skill

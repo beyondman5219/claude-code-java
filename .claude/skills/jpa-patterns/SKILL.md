@@ -1,6 +1,6 @@
 ---
 name: jpa-patterns
-description: JPA/Hibernate patterns and common pitfalls (N+1, lazy loading, transactions, queries). Use when user has JPA performance issues, LazyInitializationException, or asks about entity relationships and fetching strategies.
+description: Spring 应用程序的 JPA/Hibernate 模式和常见陷阱（N+1、lazy loading、事务、查询）。当有 JPA 性能问题时使用 (N+1, lazy loading, transactions, queries). Use when user has JPA performance issues, LazyInitializationException, or asks about entity relationships and fetching strategies.
 ---
 
 # JPA Patterns Skill

@@ -1,6 +1,6 @@
 ---
 name: issue-triage
-description: Triage and categorize GitHub issues with priority labels. Use when user says "triage issues", "check issues", "review open issues", or during regular maintenance of GitHub issue backlog.
+description: 对 GitHub issues 进行分类和优先级标记。当用户说 "triage issues" with priority labels. Use when user says "triage issues", "check issues", "review open issues", or during regular maintenance of GitHub issue backlog.
 ---
 
 # Issue Triage Skill

@@ -1,6 +1,6 @@
 ---
 name: test-quality
-description: Write high-quality JUnit 5 tests with AssertJ assertions. Use when user says "add tests", "write tests", "improve test coverage", or when reviewing/creating test classes for Java code.
+description: 使用 JUnit 5 和 AssertJ 断言编写高质量测试。当用户说 "add tests" with AssertJ assertions. Use when user says "add tests", "write tests", "improve test coverage", or when reviewing/creating test classes for Java code.
 ---
 
 # Test Quality Skill (JUnit 5 + AssertJ)

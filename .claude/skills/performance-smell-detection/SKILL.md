@@ -1,6 +1,6 @@
 ---
 name: performance-smell-detection
-description: Detect potential code-level performance smells in Java - streams, collections, boxing, regex, object creation. Provides awareness, not absolutes - always measure before optimizing. For JPA/database performance, use jpa-patterns instead.
+description: 识别 Java 代码中潜在的代码级性能问题 - streams、collections、boxing、regex、对象创建。提供意识，而非绝对标准 - 优化前先测量 in Java - streams, collections, boxing, regex, object creation. Provides awareness, not absolutes - always measure before optimizing. For JPA/database performance, use jpa-patterns instead.
 ---
 
 # Performance Smell Detection Skill

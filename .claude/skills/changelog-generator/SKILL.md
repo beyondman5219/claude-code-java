@@ -1,6 +1,6 @@
 ---
 name: changelog-generator
-description: Generate changelogs from git commits. Use when user says "generate changelog", "update changelog", "what changed since last release", or before preparing a new release.
+description: 从 git commits 生成 changelogs。当用户说 "generate changelog". Use when user says "generate changelog", "update changelog", "what changed since last release", or before preparing a new release.
 ---
 
 # Changelog Generator Skill

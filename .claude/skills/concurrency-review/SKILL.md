@@ -1,6 +1,6 @@
 ---
 name: concurrency-review
-description: Review Java concurrency code for thread safety, race conditions, deadlocks, and modern patterns (Virtual Threads, CompletableFuture, @Async). Use when user asks "check thread safety", "concurrency review", "async code review", or when reviewing multi-threaded code.
+description: 审查 Java 并发代码的线程安全性、竞态条件、死锁和现代模式。当用户询问 "check thread safety" for thread safety, race conditions, deadlocks, and modern patterns (Virtual Threads, CompletableFuture, @Async). Use when user asks "check thread safety", "concurrency review", "async code review", or when reviewing multi-threaded code.
 ---
 
 # Concurrency Review Skill

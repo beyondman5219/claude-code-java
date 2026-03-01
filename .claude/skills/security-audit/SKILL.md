@@ -1,6 +1,6 @@
 ---
 name: security-audit
-description: Java security checklist covering OWASP Top 10, input validation, injection prevention, and secure coding. Works with Spring, Quarkus, Jakarta EE, and plain Java. Use when reviewing code security, before releases, or when user asks about vulnerabilities.
+description: 基于 OWASP Top 10 和安全编码实践的 Java 安全清单。适用于 Spring、Quarkus、Jakarta EE 和纯 Java, input validation, injection prevention, and secure coding. Works with Spring, Quarkus, Jakarta EE, and plain Java. Use when reviewing code security, before releases, or when user asks about vulnerabilities.
 ---
 
 # Security Audit Skill

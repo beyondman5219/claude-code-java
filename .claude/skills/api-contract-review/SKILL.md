@@ -1,72 +1,72 @@
 ---
 name: api-contract-review
-description: Review REST API contracts for HTTP semantics, versioning, backward compatibility, and response consistency. Use when user asks "review API", "check endpoints", "REST review", or before releasing API changes.
+description: 审查 REST API 的 HTTP 语义、版本控制、向后兼容性和响应一致性。当用户询问 "review API"、"check endpoints"、"REST review" 或在发布 API 更改之前使用。
 ---
 
-# API Contract Review Skill
+# API Contract Review 技能
 
-Audit REST API design for correctness, consistency, and compatibility.
+审查 REST API 设计的正确性、一致性和兼容性。
 
-## When to Use
-- User asks "review this API" / "check REST endpoints"
-- Before releasing API changes
-- Reviewing PR with controller changes
-- Checking backward compatibility
+## 何时使用
+- 用户询问 "review this API" / "check REST endpoints"
+- 发布 API 更改之前
+- 审查包含 controller 更改的 PR
+- 检查向后兼容性
 
 ---
 
-## Quick Reference: Common Issues
+## 快速参考：常见问题
 
-| Issue | Symptom | Impact |
+| Issue | 症状 | 影响 |
 |-------|---------|--------|
-| Wrong HTTP verb | POST for idempotent operation | Confusion, caching issues |
-| Missing versioning | `/users` instead of `/v1/users` | Breaking changes affect all clients |
-| Entity leak | JPA entity in response | Exposes internals, N+1 risk |
-| 200 with error | `{"status": 200, "error": "..."}` | Breaks error handling |
-| Inconsistent naming | `/getUsers` vs `/users` | Hard to learn API |
+| 错误的 HTTP 动词 | 幂等操作使用 POST | 混淆、缓存问题 |
+| 缺少版本控制 | `/users` 而不是 `/v1/users` | 破坏性更改影响所有客户端 |
+| Entity 泄露 | 响应中包含 JPA entity | 暴露内部实现、N+1 风险 |
+| 200 状态码但返回错误 | `{"status": 200, "error": "..."}` | 破坏错误处理 |
+| 命名不一致 | `/getUsers` vs `/users` | 难以学习 API |
 
 ---
 
-## HTTP Verb Semantics
+## HTTP 动词语义
 
-### Verb Selection Guide
+### 动词选择指南
 
-| Verb | Use For | Idempotent | Safe | Request Body |
+| Verb | 用途 | 幂等 | 安全 | 请求体 |
 |------|---------|------------|------|--------------|
-| GET | Retrieve resource | Yes | Yes | No |
-| POST | Create new resource | No | No | Yes |
-| PUT | Replace entire resource | Yes | No | Yes |
-| PATCH | Partial update | No* | No | Yes |
-| DELETE | Remove resource | Yes | No | Optional |
+| GET | 检索资源 | 是 | 是 | 否 |
+| POST | 创建新资源 | 否 | 否 | 是 |
+| PUT | 替换整个资源 | 是 | 否 | 是 |
+| PATCH | 部分更新 | 否* | 否 | 是 |
+| DELETE | 删除资源 | 是 | 否 | 可选 |
 
-*PATCH can be idempotent depending on implementation
+*PATCH 根据实现可以是幂等的
 
-### Common Mistakes
+### 常见错误
 
 ```java
-// ❌ POST for retrieval
+// ❌ POST 用于检索
 @PostMapping("/users/search")
 public List<User> searchUsers(@RequestBody SearchCriteria criteria) { }
 
-// ✅ GET with query params (or POST only if criteria is very complex)
+// ✅ GET 使用查询参数（或仅在条件非常复杂时使用 POST）
 @GetMapping("/users")
 public List<User> searchUsers(
     @RequestParam String name,
     @RequestParam(required = false) String email) { }
 
-// ❌ GET for state change
+// ❌ GET 用于状态更改
 @GetMapping("/users/{id}/activate")
 public void activateUser(@PathVariable Long id) { }
 
-// ✅ POST or PATCH for state change
+// ✅ POST 或 PATCH 用于状态更改
 @PostMapping("/users/{id}/activate")
 public ResponseEntity<Void> activateUser(@PathVariable Long id) { }
 
-// ❌ POST for idempotent update
+// ❌ POST 用于幂等更新
 @PostMapping("/users/{id}")
 public User updateUser(@PathVariable Long id, @RequestBody UserDto dto) { }
 
-// ✅ PUT for full replacement, PATCH for partial
+// ✅ PUT 用于完整替换，PATCH 用于部分更新
 @PutMapping("/users/{id}")
 public User replaceUser(@PathVariable Long id, @RequestBody UserDto dto) { }
 
@@ -76,20 +76,20 @@ public User updateUser(@PathVariable Long id, @RequestBody UserPatchDto dto) { }
 
 ---
 
-## API Versioning
+## API 版本控制
 
-### Strategies
+### 策略
 
-| Strategy | Example | Pros | Cons |
+| Strategy | 示例 | 优点 | 缺点 |
 |----------|---------|------|------|
-| URL path | `/v1/users` | Clear, easy routing | URL changes |
-| Header | `Accept: application/vnd.api.v1+json` | Clean URLs | Hidden, harder to test |
-| Query param | `/users?version=1` | Easy to add | Easy to forget |
+| URL path | `/v1/users` | 清晰、易于路由 | URL 会变化 |
+| Header | `Accept: application/vnd.api.v1+json` | URL 清洁 | 隐藏、更难测试 |
+| Query param | `/users?version=1` | 易于添加 | 容易忘记 |
 
-### Recommended: URL Path
+### 推荐：URL Path
 
 ```java
-// ✅ Versioned endpoints
+// ✅ 带版本的 endpoints
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserControllerV1 { }
@@ -98,74 +98,74 @@ public class UserControllerV1 { }
 @RequestMapping("/api/v2/users")
 public class UserControllerV2 { }
 
-// ❌ No versioning
+// ❌ 没有版本控制
 @RestController
-@RequestMapping("/api/users")  // Breaking changes affect everyone
+@RequestMapping("/api/users")  // 破坏性更改会影响所有人
 public class UserController { }
 ```
 
-### Version Checklist
-- [ ] All public APIs have version in path
-- [ ] Internal APIs documented as internal (or versioned too)
-- [ ] Deprecation strategy defined for old versions
+### 版本检查清单
+- [ ] 所有公共 API 在路径中有版本
+- [ ] 内部 API 记录为内部（或也版本化）
+- [ ] 为旧版本定义弃用策略
 
 ---
 
-## Request/Response Design
+## 请求/响应设计
 
 ### DTO vs Entity
 
 ```java
-// ❌ Entity in response (leaks internals)
+// ❌ 响应中使用 Entity（泄露内部实现）
 @GetMapping("/{id}")
 public User getUser(@PathVariable Long id) {
     return userRepository.findById(id).orElseThrow();
-    // Exposes: password hash, internal IDs, lazy collections
+    // 暴露：密码哈希、内部 ID、lazy collections
 }
 
-// ✅ DTO response
+// ✅ DTO 响应
 @GetMapping("/{id}")
 public UserResponse getUser(@PathVariable Long id) {
     User user = userService.findById(id);
-    return UserResponse.from(user);  // Only public fields
+    return UserResponse.from(user);  // 仅公共字段
 }
 ```
 
-### Response Consistency
+### 响应一致性
 
 ```java
-// ❌ Inconsistent responses
+// ❌ 不一致的响应
 @GetMapping("/users")
-public List<User> getUsers() { }  // Returns array
+public List<User> getUsers() { }  // 返回数组
 
 @GetMapping("/users/{id}")
-public User getUser(@PathVariable Long id) { }  // Returns object
+public User getUser(@PathVariable Long id) { }  // 返回对象
 
 @GetMapping("/users/count")
-public int countUsers() { }  // Returns primitive
+public int countUsers() { }  // 返回基本类型
 
-// ✅ Consistent wrapper (optional but recommended for large APIs)
+// ✅ 一致的包装（可选但推荐用于大型 API）
 @GetMapping("/users")
 public ApiResponse<List<UserResponse>> getUsers() {
     return ApiResponse.success(userService.findAll());
 }
 
-// Or at minimum, consistent structure:
-// - Collections: always wrapped or always raw (pick one)
-// - Single items: always object
-// - Counts/stats: always object { "count": 42 }
+// 或至少保持一致的结构：
+// - 集合：始终包装或始终原始（选择一个）
+// - 单个项：始终对象
+// - 计数/统计：始终对象 { "count": 42 }
 ```
 
-### Pagination
+### 分页
 
 ```java
-// ❌ No pagination on collections
+// ❌ 集合没有分页
 @GetMapping("/users")
 public List<User> getAllUsers() {
-    return userRepository.findAll();  // Could be millions
+    return userRepository.findAll();  // 可能有数百万条
 }
 
-// ✅ Paginated
+// ✅ 分页
 @GetMapping("/users")
 public Page<UserResponse> getUsers(
     @RequestParam(defaultValue = "0") int page,
@@ -176,46 +176,46 @@ public Page<UserResponse> getUsers(
 
 ---
 
-## HTTP Status Codes
+## HTTP 状态码
 
-### Success Codes
+### 成功码
 
-| Code | When to Use | Response Body |
+| Code | 何时使用 | 响应体 |
 |------|-------------|---------------|
-| 200 OK | Successful GET, PUT, PATCH | Resource or result |
-| 201 Created | Successful POST (created) | Created resource + Location header |
-| 204 No Content | Successful DELETE, or PUT with no body | Empty |
+| 200 OK | 成功的 GET、PUT、PATCH | 资源或结果 |
+| 201 Created | 成功的 POST（已创建） | 创建的资源 + Location 头 |
+| 204 No Content | 成功的 DELETE，或没有体的 PUT | 空 |
 
-### Error Codes
+### 错误码
 
-| Code | When to Use | Common Mistake |
+| Code | 何时使用 | 常见错误 |
 |------|-------------|----------------|
-| 400 Bad Request | Invalid input, validation failed | Using for "not found" |
-| 401 Unauthorized | Not authenticated | Confusing with 403 |
-| 403 Forbidden | Authenticated but not allowed | Using 401 instead |
-| 404 Not Found | Resource doesn't exist | Using 400 |
-| 409 Conflict | Duplicate, concurrent modification | Using 400 |
-| 422 Unprocessable | Semantic error (valid syntax, invalid meaning) | Using 400 |
-| 500 Internal Error | Unexpected server error | Exposing stack traces |
+| 400 Bad Request | 无效输入、验证失败 | 用于 "not found" |
+| 401 Unauthorized | 未认证 | 与 403 混淆 |
+| 403 Forbidden | 已认证但不允许 | 使用 401 代替 |
+| 404 Not Found | 资源不存在 | 使用 400 |
+| 409 Conflict | 重复、并发修改 | 使用 400 |
+| 422 Unprocessable | 语义错误（语法有效，含义无效） | 使用 400 |
+| 500 Internal Error | 意外的服务器错误 | 暴露堆栈跟踪 |
 
-### Anti-Pattern: 200 with Error Body
+### 反模式：200 状态码但返回错误体
 
 ```java
-// ❌ NEVER DO THIS
+// ❌ 永远不要这样做
 @GetMapping("/{id}")
 public ResponseEntity<Map<String, Object>> getUser(@PathVariable Long id) {
     try {
         User user = userService.findById(id);
         return ResponseEntity.ok(Map.of("status", "success", "data", user));
     } catch (NotFoundException e) {
-        return ResponseEntity.ok(Map.of(  // Still 200!
+        return ResponseEntity.ok(Map.of(  // 仍然是 200！
             "status", "error",
             "message", "User not found"
         ));
     }
 }
 
-// ✅ Use proper status codes
+// ✅ 使用正确的状态码
 @GetMapping("/{id}")
 public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
     return userService.findById(id)
@@ -226,21 +226,21 @@ public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
 
 ---
 
-## Error Response Format
+## 错误响应格式
 
-### Consistent Error Structure
+### 一致的错误结构
 
 ```java
-// ✅ Standard error response
+// ✅ 标准错误响应
 public class ErrorResponse {
-    private String code;        // Machine-readable: "USER_NOT_FOUND"
-    private String message;     // Human-readable: "User with ID 123 not found"
+    private String code;        // 机器可读："USER_NOT_FOUND"
+    private String message;     // 人类可读："User with ID 123 not found"
     private Instant timestamp;
     private String path;
-    private List<FieldError> errors;  // For validation errors
+    private List<FieldError> errors;  // 用于验证错误
 }
 
-// In GlobalExceptionHandler
+// 在 GlobalExceptionHandler 中
 @ExceptionHandler(ResourceNotFoundException.class)
 public ResponseEntity<ErrorResponse> handleNotFound(
         ResourceNotFoundException ex, HttpServletRequest request) {
@@ -254,20 +254,20 @@ public ResponseEntity<ErrorResponse> handleNotFound(
 }
 ```
 
-### Security: Don't Expose Internals
+### 安全：不要暴露内部实现
 
 ```java
-// ❌ Exposes stack trace
+// ❌ 暴露堆栈跟踪
 @ExceptionHandler(Exception.class)
 public ResponseEntity<String> handleAll(Exception ex) {
     return ResponseEntity.status(500)
-        .body(ex.getStackTrace().toString());  // Security risk!
+        .body(ex.getStackTrace().toString());  // 安全风险！
 }
 
-// ✅ Generic message, log details server-side
+// ✅ 通用消息，在服务器端记录详细信息
 @ExceptionHandler(Exception.class)
 public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
-    log.error("Unexpected error", ex);  // Full details in logs
+    log.error("Unexpected error", ex);  // 完整细节在日志中
     return ResponseEntity.status(500)
         .body(ErrorResponse.of("INTERNAL_ERROR", "An unexpected error occurred"));
 }
@@ -275,27 +275,27 @@ public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
 
 ---
 
-## Backward Compatibility
+## 向后兼容性
 
-### Breaking Changes (Avoid in Same Version)
+### 破坏性更改（在同一版本中避免）
 
-| Change | Breaking? | Migration |
+| 更改 | 破坏性？ | 迁移 |
 |--------|-----------|-----------|
-| Remove endpoint | Yes | Deprecate first, remove in next version |
-| Remove field from response | Yes | Keep field, return null/default |
-| Add required field to request | Yes | Make optional with default |
-| Change field type | Yes | Add new field, deprecate old |
-| Rename field | Yes | Support both temporarily |
-| Change URL path | Yes | Redirect old to new |
+| 删除 endpoint | 是 | 先弃用，在下一版本中删除 |
+| 从响应中删除字段 | 是 | 保留字段，返回 null/default |
+| 向请求添加必填字段 | 是 | 设为可选并带默认值 |
+| 更改字段类型 | 是 | 添加新字段，弃用旧的 |
+| 重命名字段 | 是 | 暂时同时支持两者 |
+| 更改 URL 路径 | 是 | 将旧的重定向到新的 |
 
-### Non-Breaking Changes (Safe)
+### 非破坏性更改（安全）
 
-- Add optional field to request
-- Add field to response
-- Add new endpoint
-- Add new optional query parameter
+- 向请求添加可选字段
+- 向响应添加字段
+- 添加新 endpoint
+- 添加新的可选查询参数
 
-### Deprecation Pattern
+### 弃用模式
 
 ```java
 @RestController
@@ -303,12 +303,12 @@ public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
 public class UserControllerV1 {
 
     @Deprecated
-    @GetMapping("/by-email")  // Old endpoint
+    @GetMapping("/by-email")  // 旧 endpoint
     public UserResponse getByEmailOld(@RequestParam String email) {
-        return getByEmail(email);  // Delegate to new
+        return getByEmail(email);  // 委托给新的
     }
 
-    @GetMapping(params = "email")  // New pattern
+    @GetMapping(params = "email")  // 新模式
     public UserResponse getByEmail(@RequestParam String email) {
         return userService.findByEmail(email);
     }
@@ -317,62 +317,62 @@ public class UserControllerV1 {
 
 ---
 
-## API Review Checklist
+## API 审查清单
 
-### 1. HTTP Semantics
-- [ ] GET for retrieval only (no side effects)
-- [ ] POST for creation (returns 201 + Location)
-- [ ] PUT for full replacement (idempotent)
-- [ ] PATCH for partial updates
-- [ ] DELETE for removal (idempotent)
+### 1. HTTP 语义
+- [ ] GET 仅用于检索（无副作用）
+- [ ] POST 用于创建（返回 201 + Location）
+- [ ] PUT 用于完整替换（幂等）
+- [ ] PATCH 用于部分更新
+- [ ] DELETE 用于删除（幂等）
 
-### 2. URL Design
-- [ ] Versioned (`/v1/`, `/v2/`)
-- [ ] Nouns, not verbs (`/users`, not `/getUsers`)
-- [ ] Plural for collections (`/users`, not `/user`)
-- [ ] Hierarchical for relationships (`/users/{id}/orders`)
-- [ ] Consistent naming (kebab-case or camelCase, pick one)
+### 2. URL 设计
+- [ ] 版本化（`/v1/`、`/v2/`）
+- [ ] 名词，不是动词（`/users`，不是 `/getUsers`）
+- [ ] 集合使用复数（`/users`，不是 `/user`）
+- [ ] 关系使用层次结构（`/users/{id}/orders`）
+- [ ] 一致的命名（kebab-case 或 camelCase，选择一个）
 
-### 3. Request Handling
-- [ ] Validation with `@Valid`
-- [ ] Clear error messages for validation failures
-- [ ] Request DTOs (not entities)
-- [ ] Reasonable size limits
+### 3. 请求处理
+- [ ] 使用 `@Valid` 进行验证
+- [ ] 验证失败的清晰错误消息
+- [ ] 请求 DTO（非 entities）
+- [ ] 合理的大小限制
 
-### 4. Response Design
-- [ ] Response DTOs (not entities)
-- [ ] Consistent structure across endpoints
-- [ ] Pagination for collections
-- [ ] Proper status codes (not 200 for errors)
+### 4. 响应设计
+- [ ] 响应 DTO（非 entities）
+- [ ] endpoints 间的一致结构
+- [ ] 集合的分页
+- [ ] 正确的状态码（错误不返回 200）
 
-### 5. Error Handling
-- [ ] Consistent error format
-- [ ] Machine-readable error codes
-- [ ] Human-readable messages
-- [ ] No stack traces exposed
-- [ ] Proper 4xx vs 5xx distinction
+### 5. 错误处理
+- [ ] 一致的错误格式
+- [ ] 机器可读的错误码
+- [ ] 人类可读的消息
+- [ ] 不暴露堆栈跟踪
+- [ ] 正确的 4xx vs 5xx 区分
 
-### 6. Compatibility
-- [ ] No breaking changes in current version
-- [ ] Deprecated endpoints documented
-- [ ] Migration path for breaking changes
+### 6. 兼容性
+- [ ] 当前版本中没有破坏性更改
+- [ ] 记录已弃用的 endpoints
+- [ ] 破坏性更改的迁移路径
 
 ---
 
-## Token Optimization
+## Token 优化
 
-For large APIs:
-1. List all controllers: `find . -name "*Controller.java"`
-2. Sample 2-3 controllers for pattern analysis
-3. Check `@ExceptionHandler` configuration once
-4. Grep for specific anti-patterns:
+对于大型 API：
+1. 列出所有 controllers：`find . -name "*Controller.java"`
+2. 采样 2-3 个 controllers 进行模式分析
+3. 检查 `@ExceptionHandler` 配置一次
+4. Grep 查找特定反模式：
    ```bash
-   # Find potential entity leaks
+   # 查找潜在的 entity 泄露
    grep -r "public.*Entity.*@GetMapping" --include="*.java"
 
-   # Find 200 with error patterns
+   # 查找 200 状态码但返回错误的模式
    grep -r "ResponseEntity.ok.*error" --include="*.java"
 
-   # Find unversioned APIs
+   # 查找未版本化的 API
    grep -r "@RequestMapping.*api" --include="*.java" | grep -v "/v[0-9]"
    ```
