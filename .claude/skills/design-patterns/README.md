@@ -4,23 +4,23 @@
 
 ---
 
-## Description
+## 描述
 
-Common design patterns with practical Java examples. Covers creational, behavioral, and structural patterns with modern Java syntax and Spring integration.
+常见设计模式及实用的 Java 示例。涵盖创建型、行为型和结构型模式，使用现代 Java 语法和 Spring 集成。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Implement factory pattern for notifications"
 - "Use builder for this complex object"
-- "How to add features without modifying class?" (Decorator)
-- "Multiple payment methods, swap at runtime" (Strategy)
-- "Notify multiple services when order placed" (Observer)
+- "How to add features without modifying class?"（Decorator）
+- "Multiple payment methods, swap at runtime"（Strategy）
+- "Notify multiple services when order placed"（Observer）
 
 ---
 
-## Examples
+## 示例
 
 ```
 > view .claude/skills/design-patterns/SKILL.md
@@ -30,17 +30,17 @@ Common design patterns with practical Java examples. Covers creational, behavior
 
 ---
 
-## Patterns Covered
+## 涵盖的模式
 
 | Category | Patterns |
 |----------|----------|
-| **Creational** | Builder, Factory Method, Singleton |
-| **Behavioral** | Strategy, Observer, Template Method |
-| **Structural** | Decorator, Adapter |
+| **Creational** | Builder、Factory Method、Singleton |
+| **Behavioral** | Strategy、Observer、Template Method |
+| **Structural** | Decorator、Adapter |
 
 ---
 
-## Quick Selection Guide
+## 快速选择指南
 
 | Problem | Pattern |
 |---------|---------|
@@ -53,15 +53,15 @@ Common design patterns with practical Java examples. Covers creational, behavior
 
 ---
 
-## Related Skills
+## 相关技能
 
-- `solid-principles` - Principles patterns implement
-- `clean-code` - Code-level practices
-- `spring-boot-patterns` - Spring implementations
+- `solid-principles` - 模式实现的原则
+- `clean-code` - 代码级实践
+- `spring-boot-patterns` - Spring 实现
 
 ---
 
-## Resources
+## 参考资料
 
 - [Refactoring Guru - Design Patterns](https://refactoring.guru/design-patterns)
 - [Design Patterns by Gang of Four](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)

@@ -1,44 +1,44 @@
-# Testing Strategy
+# 测试策略
 
-> How to test and validate claude-code-java scripts
+> 如何测试和验证 claude-code-java 脚本
 
-## Current Approach: Simple Test Script
+## 当前方法：简单测试脚本
 
-For MVP phase, we use a simple bash test script that validates all setup scripts work correctly.
+对于 MVP 阶段，我们使用一个简单的 bash 测试脚本来验证所有设置脚本正常工作。
 
-### Running Tests
+### 运行测试
 
 ```bash
 ./scripts/test-all.sh
 ```
 
-### What It Tests
+### 测试内容
 
-| Script | Validations |
+| 脚本 | 验证 |
 |--------|-------------|
-| `link-skills.sh` | Creates `.claude/`, symlink points to workspace |
-| `generate-claude-md.sh` | Creates `CLAUDE.md` with content |
-| `configure-mcp.sh` | Template file exists |
+| `link-skills.sh` | 创建 `.claude/`，符号链接指向工作区 |
+| `generate-claude-md.sh` | 创建包含内容的 `CLAUDE.md` |
+| `configure-mcp.sh` | 模板文件存在 |
 
-### Test Philosophy
+### 测试理念
 
-- Tests run in a temporary directory (auto-cleaned)
-- Zero external dependencies
-- Fast execution (< 2 seconds)
-- Clear pass/fail output
+- 测试在临时目录中运行（自动清理）
+- 零外部依赖
+- 快速执行（< 2 秒）
+- 清晰的通过/失败输出
 
-## Future Options
+## 未来选项
 
-### Option 1: bats-core (Recommended for growth)
+### 选项 1：bats-core（推荐用于增长）
 
-[bats-core](https://github.com/bats-core/bats-core) - Bash Automated Testing System
+[bats-core](https://github.com/bats-core/bats-core) - Bash 自动化测试系统
 
-**When to adopt:**
-- 10+ test cases
-- Multiple contributors
-- Want better test organization (describe/it blocks)
+**何时采用：**
+- 10+ 个测试用例
+- 多个贡献者
+- 想要更好的测试组织（describe/it 块）
 
-**Example:**
+**示例：**
 ```bash
 @test "link-skills creates symlink" {
     run ./scripts/link-skills.sh "$TEST_DIR"
@@ -47,16 +47,16 @@ For MVP phase, we use a simple bash test script that validates all setup scripts
 }
 ```
 
-**Install:** `npm install -g bats` or `brew install bats-core`
+**安装：** `npm install -g bats` 或 `brew install bats-core`
 
-### Option 2: GitHub Actions CI
+### 选项 2：GitHub Actions CI
 
-**When to adopt:**
-- Project is public on GitHub
-- Want automatic validation on PRs
-- Multiple contributors
+**何时采用：**
+- 项目在 GitHub 上公开
+- 想要在 PR 上自动验证
+- 多个贡献者
 
-**Example workflow (`.github/workflows/test.yml`):**
+**示例工作流（`.github/workflows/test.yml`）：**
 ```yaml
 name: Test
 on: [push, pull_request]
@@ -69,45 +69,45 @@ jobs:
       - run: ./scripts/test-all.sh
 ```
 
-### Option 3: Pre-commit Hook
+### 选项 3：Pre-commit Hook
 
-**When to adopt:**
-- Want to catch issues before commit
-- Local-only validation
+**何时采用：**
+- 想要在 commit 之前发现问题
+- 仅本地验证
 
-**Setup:**
+**设置：**
 ```bash
 # .git/hooks/pre-commit
 #!/bin/bash
 ./scripts/test-all.sh || exit 1
 ```
 
-## Decision Framework
+## 决策框架
 
-| Phase | Recommended Approach |
+| 阶段 | 推荐方法 |
 |-------|---------------------|
-| MVP (now) | Simple test script |
-| v0.3+ with contributors | Add bats-core |
-| Public release | Add GitHub Actions |
-| Team adoption | Add pre-commit hooks |
+| MVP（现在） | 简单测试脚本 |
+| v0.3+ 带贡献者 | 添加 bats-core |
+| 公开发布 | 添加 GitHub Actions |
+| 团队采用 | 添加 pre-commit hooks |
 
-## Adding New Tests
+## 添加新测试
 
-When adding a new script, add corresponding tests to `test-all.sh`:
+添加新脚本时，在 `test-all.sh` 中添加相应的测试：
 
 ```bash
-# Test N: new-script.sh
+# 测试 N：new-script.sh
 echo "Testing new-script.sh..."
 "$SCRIPT_DIR/new-script.sh" "$TEST_DIR" > /dev/null 2>&1
 check "[ -f '$TEST_DIR/expected-output' ]" "expected output created"
 echo ""
 ```
 
-## Manual Testing Checklist
+## 手动测试清单
 
-For changes that are hard to automate:
+对于难以自动化的更改：
 
-- [ ] Run `setup-project.sh` on a real Java project
-- [ ] Verify skills symlink works in Claude Code
-- [ ] Test on fresh directory (no existing `.claude/`)
-- [ ] Test on directory with existing `.claude/skills`
+- [ ] 在真实的 Java 项目上运行 `setup-project.sh`
+- [ ] 验证技能符号链接在 Claude Code 中工作
+- [ ] 在新目录上测试（没有现有的 `.claude/`）
+- [ ] 在带有现有 `.claude/skills` 的目录上测试

@@ -1,186 +1,185 @@
 # claude-code-java
 
-> Reusable AI development infrastructure for Java projects, optimized for Claude Code
+> 为 Java 项目打造的可复用 AI 开发基础设施，针对 Claude Code 进行优化
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-*This project is not affiliated with Anthropic.*
+*本项目与 Anthropic 无关联。*
 
-## What is this?
+## 这是什么？
 
-A collection of reusable components for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) - Anthropic's agentic coding tool. The core of this project is a set of **skills** (structured markdown files that provide Claude with domain knowledge and workflows), but it also includes project templates, MCP server configurations, and setup scripts.
+[Anthropic 的智能编码工具](https://docs.anthropic.com/en/docs/claude-code)的可复用组件集合。该项目的核心是一套 **skills**（技能）（结构化的 markdown 文件，为 Claude 提供领域知识和工作流），但也包括项目模板、MCP 服务器配置和设置脚本。
 
-**Who is this for?** Java developers using Claude Code who want consistent, high-quality AI assistance for common tasks like code reviews, testing, commits, and architecture decisions.
+**适合谁使用？** 使用 Claude Code 的 Java 开发者，希望在代码审查、测试、提交和架构决策等常见任务中获得一致、高质量的 AI 辅助。
 
-## Purpose
+## 目的
 
-AI-powered development workflows with focus on:
-- **Token efficiency** - Designed for fewer iterations and lower token usage
-- **Reproducible patterns** - Reusable workflows across projects
-- **Java ecosystem** - Tailored for Java/Maven development
-- **Incremental adoption** - Start small, expand as needed
+以 AI 驱动的开发工作流程，重点关注：
+- **Token 效率** - 旨在减少迭代次数并降低 token 使用量
+- **可复用模式** - 跨项目的可复用工作流
+- **Java 生态系统** - 专为 Java/Maven 开发定制
+- **渐进式采用** - 从小规模开始，按需扩展
 
-## Quick Start
+## 快速开始
 
-### 1. Clone this workspace
+### 1. 克隆此工作区
 ```bash
 git clone https://github.com/decebals/claude-code-java.git ~/projects/claude-code-java
 cd ~/projects/claude-code-java
 chmod +x scripts/*.sh
 ```
 
-### 2. Setup your Java project
+### 2. 设置你的 Java 项目
 ```bash
 ./scripts/setup-project.sh ~/projects/your-java-project
 ```
 
-This creates `.claude/` with symlinked skills, generates `CLAUDE.md`, and configures settings.
+这会创建包含符号链接技能的 `.claude/` 目录，生成 `CLAUDE.md`，并配置 settings。
 
-**Prefer manual setup?** Just copy or symlink the skills you want:
+**更喜欢手动设置？** 只需复制或符号链接你想要的技能：
 ```bash
 mkdir -p your-project/.claude/skills
 
-# Copy specific skills
+# 复制特定技能
 cp -r ~/projects/claude-code-java/.claude/skills/java-code-review your-project/.claude/skills/
 
-# Or symlink all skills
+# 或符号链接所有技能
 ln -s ~/projects/claude-code-java/.claude/skills/* your-project/.claude/skills/
 ```
 
-### 3. Use with Claude Code
+### 3. 与 Claude Code 一起使用
 ```bash
 cd ~/projects/your-java-project
 claude
 
-# Skills load automatically based on context, or invoke directly:
+# 技能基于上下文自动加载，或直接调用：
 > /git-commit
 > /java-code-review
 ```
 
-## Available Skills (18)
+## 可用技能 (18 个)
 
-Skills are automatically loaded by Claude Code based on context.
+技能由 Claude Code 根据上下文自动加载。
 
-### Workflow
-| Skill | Trigger Examples |
+### 工作流
+| 技能 | 触发示例 |
 |-------|------------------|
-| [**git-commit**](.claude/skills/git-commit/) | "commit these changes", "create commit" |
-| [**changelog-generator**](.claude/skills/changelog-generator/) | "generate changelog", "what changed since release" |
-| [**issue-triage**](.claude/skills/issue-triage/) | "triage issues", "check open issues" |
+| [**git-commit**](.claude/skills/git-commit/) | "提交这些更改", "创建 commit" |
+| [**changelog-generator**](.claude/skills/changelog-generator/) | "生成 changelog", "自发布以来有什么变化" |
+| [**issue-triage**](.claude/skills/issue-triage/) | "分类 issues", "检查开放 issues" |
 
-### Code Quality
-| Skill | Trigger Examples |
+### 代码质量
+| 技能 | 触发示例 |
 |-------|------------------|
-| [**java-code-review**](.claude/skills/java-code-review/) | "review this code", "check this PR" |
-| [**api-contract-review**](.claude/skills/api-contract-review/) | "review API", "check REST endpoints" |
-| [**concurrency-review**](.claude/skills/concurrency-review/) | "check thread safety", "review async code" |
-| [**performance-smell-detection**](.claude/skills/performance-smell-detection/) | "check performance", "find slow code" |
-| [**test-quality**](.claude/skills/test-quality/) | "add tests", "improve coverage" |
-| [**maven-dependency-audit**](.claude/skills/maven-dependency-audit/) | "check dependencies", "audit deps" |
-| [**security-audit**](.claude/skills/security-audit/) | "security review", "check OWASP", "vulnerabilities" |
+| [**java-code-review**](.claude/skills/java-code-review/) | "审查这段代码", "检查这个 PR" |
+| [**api-contract-review**](.claude/skills/api-contract-review/) | "审查 API", "检查 REST endpoints" |
+| [**concurrency-review**](.claude/skills/concurrency-review/) | "检查线程安全", "审查异步代码" |
+| [**performance-smell-detection**](.claude/skills/performance-smell-detection/) | "检查性能", "查找慢代码" |
+| [**test-quality**](.claude/skills/test-quality/) | "添加测试", "提高覆盖率" |
+| [**maven-dependency-audit**](.claude/skills/maven-dependency-audit/) | "检查依赖", "审计 deps" |
+| [**security-audit**](.claude/skills/security-audit/) | "安全审查", "检查 OWASP", "漏洞" |
 
-### Architecture & Design
-| Skill | Trigger Examples |
+### 架构与设计
+| 技能 | 触发示例 |
 |-------|------------------|
-| [**architecture-review**](.claude/skills/architecture-review/) | "review architecture", "check package structure" |
-| [**solid-principles**](.claude/skills/solid-principles/) | "check SOLID", "single responsibility" |
-| [**design-patterns**](.claude/skills/design-patterns/) | "use factory pattern", "implement strategy" |
-| [**clean-code**](.claude/skills/clean-code/) | "clean this code", "refactor" |
+| [**architecture-review**](.claude/skills/architecture-review/) | "审查架构", "检查 package 结构" |
+| [**solid-principles**](.claude/skills/solid-principles/) | "检查 SOLID", "单一职责" |
+| [**design-patterns**](.claude/skills/design-patterns/) | "使用 factory pattern", "实现 strategy" |
+| [**clean-code**](.claude/skills/clean-code/) | "清理这段代码", "重构" |
 
-### Framework & Data
-| Skill | Trigger Examples |
+### 框架与数据
+| 技能 | 触发示例 |
 |-------|------------------|
-| [**spring-boot-patterns**](.claude/skills/spring-boot-patterns/) | "create controller", "Spring Boot help" |
-| [**java-migration**](.claude/skills/java-migration/) | "upgrade to Java 21", "migrate from Java 8" |
-| [**jpa-patterns**](.claude/skills/jpa-patterns/) | "N+1 problem", "LazyInitializationException" |
-| [**logging-patterns**](.claude/skills/logging-patterns/) | "add logging", "debug this flow", "analyze logs" |
+| [**spring-boot-patterns**](.claude/skills/spring-boot-patterns/) | "创建 controller", "Spring Boot 帮助" |
+| [**java-migration**](.claude/skills/java-migration/) | "升级到 Java 21", "从 Java 8 迁移" |
+| [**jpa-patterns**](.claude/skills/jpa-patterns/) | "N+1 问题", "LazyInitializationException" |
+| [**logging-patterns**](.claude/skills/logging-patterns/) | "添加日志", "调试这个流程", "分析日志" |
 
-See [.claude/skills/README.md](.claude/skills/README.md) for full documentation and [docs/SCRIPTS.md](docs/SCRIPTS.md) for setup script options.
+查看 [.claude/skills/README.md](.claude/skills/README.md) 获取完整文档，查看 [docs/SCRIPTS.md](docs/SCRIPTS.md) 了解设置脚本选项。
 
-## Project Structure
+## 项目结构
 
 ```
 claude-code-java/
-├── README.md                    # This file
-├── LICENSE                      # MIT license
-├── .gitignore                   # Git ignore rules
+├── README.md                    # 本文件
+├── LICENSE                      # MIT 许可证
+├── .gitignore                   # Git 忽略规则
 ├── .claude/
-│   └── skills/                  # 18 reusable skills (see Available Skills above)
-├── docs/                        # Guidelines and best practices
-│   ├── DESIGN_PRINCIPLES.md     # Core philosophy
-│   ├── RED_FLAGS.md             # Warning signs to watch for
-│   ├── SAFE_WORKFLOWS.md        # Step-by-step safe workflows
-│   ├── SCRIPTS.md               # Scripts documentation
-│   ├── SKILL_GUIDELINES.md      # How to create new skills
-│   └── TESTING.md               # Testing strategy
+│   └── skills/                  # 18 个可复用技能（见上文可用技能）
+├── docs/                        # 指南和最佳实践
+│   ├── DESIGN_PRINCIPLES.md     # 核心理念
+│   ├── RED_FLAGS.md             # 需警惕的警告信号
+│   ├── SAFE_WORKFLOWS.md        # 分步安全工作流
+│   ├── SCRIPTS.md               # 脚本文档
+│   ├── SKILL_GUIDELINES.md      # 如何创建新技能
+│   └── TESTING.md               # 测试策略
 ├── templates/
-│   ├── CLAUDE.md.template       # Template for projects
-│   ├── mcp-config.json.template # MCP configuration template
-│   ├── MCP_CONFIG.md.template   # MCP documentation template
-│   └── settings.json.template   # Claude Code settings (pre-approved commands)
+│   ├── CLAUDE.md.template       # 项目模板
+│   ├── mcp-config.json.template # MCP 配置模板
+│   ├── MCP_CONFIG.md.template   # MCP 文档模板
+│   └── settings.json.template   # Claude Code 设置（预批准的命令）
 └── scripts/
-    ├── setup-project.sh         # Full project setup (orchestrator)
-    ├── link-skills.sh           # Symlink skills to project
-    ├── generate-claude-md.sh    # Generate CLAUDE.md
-    ├── configure-mcp.sh         # Configure MCP servers
-    └── test-all.sh              # Run all tests
+    ├── setup-project.sh         # 完整项目设置（编排器）
+    ├── link-skills.sh           # 将技能符号链接到项目
+    ├── generate-claude-md.sh    # 生成 CLAUDE.md
+    ├── configure-mcp.sh         # 配置 MCP 服务器
+    └── test-all.sh              # 运行所有测试
 ```
 
-## Typical Workflow
+## 典型工作流
 
-1. **Link skills** to your Java project
-2. **Start Claude Code** in project directory
-3. **Load skill** relevant to current task
-4. **Execute workflow** with natural language
-5. **Measure results** (tokens used, time saved)
+1. 将技能链接到你的 Java 项目
+2. 在项目目录中启动 Claude Code
+3. 加载与当前任务相关的技能
+4. 使用自然语言执行工作流
+5. 测量结果（使用的 token、节省的时间）
 
-## Success Metrics
+## 成功指标
 
-Track these to validate effectiveness:
+追踪这些指标以验证有效性：
 
-- **Token reduction**: Track your improvement vs manual workflows
-- **Time savings**: Measure before/after per task
-- **Reusability**: Number of projects using skills
-- **Quality**: Code review feedback, test coverage
+- **Token 减少**：追踪与手动工作流相比的改进
+- **时间节省**：测量每个任务的改进前后
+- **可复用性**：使用技能的项目数量
+- **质量**：代码审查反馈、测试覆盖率
 
-## Requirements
+## 系统要求
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
-- Java 11+ projects (Java 17+ recommended)
-- Git for version control
-- Maven or Gradle build tool
-- (Optional) [GitHub MCP server](https://github.com/github/github-mcp-server) for issue management
+- 已安装 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
+- Java 11+ 项目（推荐 Java 17+）
+- Git 版本控制
+- Maven 或 Gradle 构建工具
+- （可选）[GitHub MCP server](https://github.com/github/github-mcp-server) 用于 issue 管理
 
-## What's Included
+## 包含内容
 
-- 18 skills (workflow, code quality, architecture, frameworks)
-- Setup automation scripts
-- Project templates
-- YAML frontmatter for automatic skill detection
+- 18 个技能（工作流、代码质量、架构、框架）
+- 设置自动化脚本
+- 项目模板
+- YAML frontmatter 用于自动技能检测
 
-## Used in automated code review
+## 用于自动化代码审查
 
-These skills are not just for code generation — they are also used as the **single source of truth** for automated code review via [`skill-review`](https://github.com/decebals/skill-review), a reusable GitHub Actions workflow that evaluates pull requests against the same skills that Claude Code uses during development.
+这些技能不仅用于代码生成 — 它们还用作自动化代码审查的**单一真实来源**，通过 [`skill-review`](https://github.com/decebals/skill-review)，一个可复用的 GitHub Actions 工作流，根据 Claude Code 在开发期间使用的相同技能来评估 pull requests。
 
-Same skills. From generation to review. See [`skill-review-sandbox`](https://github.com/decebals/skill-review-sandbox) for a working example.
+相同的技能。从生成到审查。参见 [`skill-review-sandbox`](https://github.com/decebals/skill-review-sandbox) 获取工作示例。
 
-## Contributing
+## 贡献
 
-Skills are evolving based on real-world usage. Try them, open issues, share what works.
+技能基于实际使用不断演进。试用它们，提出问题，分享有效的方法。
 
-1. Try the skills in your projects
-2. Open issues for suggestions
-3. Share token savings/improvements
+1. 在你的项目中试用这些技能
+2. 为建议提出 issues
+3. 分享 token 节省/改进
 
-## Documentation
+## 文档
 
-See [docs/](docs/) for detailed guides:
-- [DESIGN_PRINCIPLES.md](docs/DESIGN_PRINCIPLES.md) - Core philosophy
-- [SAFE_WORKFLOWS.md](docs/SAFE_WORKFLOWS.md) - Recommended workflows
-- [RED_FLAGS.md](docs/RED_FLAGS.md) - Warning signs to watch for
-- [SKILL_GUIDELINES.md](docs/SKILL_GUIDELINES.md) - How to create new skills
+查看 [docs/](docs/) 获取详细指南：
+- [DESIGN_PRINCIPLES.md](docs/DESIGN_PRINCIPLES.md) - 核心理念
+- [SAFE_WORKFLOWS.md](docs/SAFE_WORKFLOWS.md) - 推荐工作流
+- [RED_FLAGS.md](docs/RED_FLAGS.md) - 需警惕的警告信号
+- [SKILL_GUIDELINES.md](docs/SKILL_GUIDELINES.md) - 如何创建新技能
 
-## License
+## 许可证
 
-MIT License - Use freely, modify as needed.
-
+MIT License - 可自由使用，按需修改。

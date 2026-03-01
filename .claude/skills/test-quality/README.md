@@ -4,13 +4,13 @@
 
 ---
 
-## Description
+## 描述
 
-Helps Claude suggest meaningful JUnit tests and improve test coverage for Java projects.
+帮助 Claude 建议有意义的 JUnit 测试并提高 Java 项目的测试覆盖率。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Add tests for PluginManager.loadAll()"
 - "Review existing tests in PluginLoaderTest"
@@ -18,7 +18,7 @@ Helps Claude suggest meaningful JUnit tests and improve test coverage for Java p
 
 ---
 
-## Examples
+## 示例
 
 ```
 > view .claude/skills/test-quality/SKILL.md
@@ -28,7 +28,7 @@ Helps Claude suggest meaningful JUnit tests and improve test coverage for Java p
 
 ---
 
-## Notes / Tips
+## 注意事项 / 提示
 
-- Works best when class/method signatures are available
-- Can suggest missing edge cases or null checks
+- 当类/方法签名可用时效果最好
+- 可以建议缺失的边缘情况或空值检查

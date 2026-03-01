@@ -4,13 +4,13 @@
 
 ---
 
-## Description
+## 描述
 
-Helps Claude categorize, prioritize, and respond to issues in Java projects.
+帮助 Claude 对 Java 项目中的 issues 进行分类、确定优先级和响应。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Triage the last 10 issues"
 - "Check recent bug reports"
@@ -18,7 +18,7 @@ Helps Claude categorize, prioritize, and respond to issues in Java projects.
 
 ---
 
-## Examples
+## 示例
 
 ```
 > view .claude/skills/issue-triage/SKILL.md
@@ -28,6 +28,6 @@ Helps Claude categorize, prioritize, and respond to issues in Java projects.
 
 ---
 
-## Notes / Tips
+## 注意事项 / 提示
 
-- Ideal for GitHub or GitLab issues
+- 最适合 GitHub 或 GitLab issues

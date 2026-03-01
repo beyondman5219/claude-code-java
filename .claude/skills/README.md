@@ -1,88 +1,88 @@
-# Skills
+# 技能
 
-Skills are reusable prompts that teach Claude specific patterns for Java development.
+技能是可复用的提示，教 Claude Java 开发的特定模式。
 
-## Structure Convention
+## 结构约定
 
-Each skill folder contains:
+每个技能文件夹包含：
 
-| File | Purpose | Audience |
+| 文件 | 目的 | 受众 |
 |------|---------|----------|
-| `SKILL.md` | Instructions for Claude | AI (loaded with `view`) |
-| `README.md` | Documentation, examples, tips | Humans (onboarding) |
+| `SKILL.md` | Claude 的指令 | AI（使用 `view` 加载） |
+| `README.md` | 文档、示例、提示 | 人类（入职） |
 
-## Available Skills
+## 可用技能
 
-### Workflow
-| Skill | Description |
+### 工作流
+| 技能 | 描述 |
 |-------|-------------|
-| [git-commit](git-commit/) | Conventional commit messages for Java projects |
-| [changelog-generator](changelog-generator/) | Generate changelogs from git commits |
-| [issue-triage](issue-triage/) | GitHub issue triage and categorization |
+| [git-commit](git-commit/) | 用于 Java 项目的 Conventional commit 消息 |
+| [changelog-generator](changelog-generator/) | 从 git commits 生成 changelogs |
+| [issue-triage](issue-triage/) | GitHub issue 分类和分类 |
 
-### Code Quality
-| Skill | Description |
+### 代码质量
+| 技能 | 描述 |
 |-------|-------------|
-| [java-code-review](java-code-review/) | Systematic Java code review checklist |
-| [api-contract-review](api-contract-review/) | REST API audit: HTTP semantics, versioning, compatibility |
-| [concurrency-review](concurrency-review/) | Thread safety, race conditions, @Async, Virtual Threads |
-| [performance-smell-detection](performance-smell-detection/) | Code-level performance smells (streams, boxing, regex) |
-| [test-quality](test-quality/) | JUnit 5 + AssertJ testing patterns |
-| [maven-dependency-audit](maven-dependency-audit/) | Audit dependencies for updates and vulnerabilities |
-| [security-audit](security-audit/) | OWASP Top 10, input validation, injection prevention |
+| [java-code-review](java-code-review/) | 系统的 Java 代码审查清单 |
+| [api-contract-review](api-contract-review/) | REST API 审计：HTTP 语义、版本控制、兼容性 |
+| [concurrency-review](concurrency-review/) | 线程安全、竞态条件、@Async、Virtual Threads |
+| [performance-smell-detection](performance-smell-detection/) | 代码级性能异味（streams、boxing、regex） |
+| [test-quality](test-quality/) | JUnit 5 + AssertJ 测试模式 |
+| [maven-dependency-audit](maven-dependency-audit/) | 审计依赖的更新和漏洞 |
+| [security-audit](security-audit/) | OWASP Top 10、输入验证、注入预防 |
 
-### Architecture & Design
-| Skill | Description |
+### 架构与设计
+| 技能 | 描述 |
 |-------|-------------|
-| [architecture-review](architecture-review/) | Macro-level review: packages, modules, layers, boundaries |
-| [solid-principles](solid-principles/) | S.O.L.I.D. principles with Java examples |
-| [design-patterns](design-patterns/) | Factory, Builder, Strategy, Observer, Decorator, etc. |
-| [clean-code](clean-code/) | DRY, KISS, YAGNI, naming, refactoring |
+| [architecture-review](architecture-review/) | 宏观级审查：包、模块、层、边界 |
+| [solid-principles](solid-principles/) | 带有 Java 示例的 S.O.L.I.D. 原则 |
+| [design-patterns](design-patterns/) | Factory、Builder、Strategy、Observer、Decorator 等 |
+| [clean-code](clean-code/) | DRY、KISS、YAGNI、命名、重构 |
 
-### Framework & Data
-| Skill | Description |
+### 框架与数据
+| 技能 | 描述 |
 |-------|-------------|
-| [spring-boot-patterns](spring-boot-patterns/) | Spring Boot best practices |
-| [java-migration](java-migration/) | Java version upgrade guide (8→11→17→21) |
-| [jpa-patterns](jpa-patterns/) | JPA/Hibernate patterns (N+1, lazy loading, transactions) |
-| [logging-patterns](logging-patterns/) | Structured logging (JSON), SLF4J, MDC, AI-friendly formats |
+| [spring-boot-patterns](spring-boot-patterns/) | Spring Boot 最佳实践 |
+| [java-migration](java-migration/) | Java 版本升级指南（8→11→17→21） |
+| [jpa-patterns](jpa-patterns/) | JPA/Hibernate 模式（N+1、lazy loading、事务） |
+| [logging-patterns](logging-patterns/) | 结构化日志（JSON）、SLF4J、MDC、AI 友好格式 |
 
-## Adding a New Skill
+## 添加新技能
 
-### Before You Start
+### 开始之前
 
-Validate your skill idea against existing skills:
+根据现有技能验证你的技能想法：
 
-- [ ] **No significant overlap** - Check the table above for similar skills
-- [ ] **Clear level** - Micro (functions) / Meso (classes) / Macro (packages) / Framework / Cross-cutting
-- [ ] **Clear type** - Audit (review existing code) or Template (show how to write)
-- [ ] **Unique value** - What does it add that doesn't exist?
-- [ ] **Focused scope** - Can be applied in one session (<15 checklist items)
+- [ ] **无显著重叠** - 检查上表是否有类似技能
+- [ ] **清晰的级别** - 微观（函数）/ 中观（类）/ 宏观（包）/ 框架 / 横切
+- [ ] **清晰的类型** - 审计（审查现有代码）或 模板（展示如何编写）
+- [ ] **独特价值** - 它添加了什么不存在的？
+- [ ] **专注的范围** - 可以在一个会话中应用（<15 个清单项）
 
-> 📖 **Full guidelines:** [docs/SKILL_GUIDELINES.md](../../docs/SKILL_GUIDELINES.md)
+> 📖 **完整指南：** [docs/SKILL_GUIDELINES.md](../../docs/SKILL_GUIDELINES.md)
 
-### Implementation Steps
+### 实现步骤
 
-1. Create folder: `.claude/skills/<skill-name>/`
-2. Create `SKILL.md` with instructions for Claude
-3. Create `README.md` with human documentation (use existing READMEs as template)
-4. Update this table
-5. Update main README.md
+1. 创建文件夹：`.claude/skills/<skill-name>/`
+2. 创建 `SKILL.md`，包含 Claude 的指令
+3. 创建 `README.md`，包含人类文档（使用现有 README 作为模板）
+4. 更新此表
+5. 更新主 README.md
 
-## Usage
+## 使用方法
 
-Skills are automatically loaded by Claude Code based on context. You can also invoke them directly:
+技能由 Claude Code 根据上下文自动加载。你也可以直接调用它们：
 
 ```bash
-# Automatic - Claude detects when to use skills
-> "Commit these changes"        # Loads git-commit
-> "Review this code for SOLID"  # Loads solid-principles
+# 自动 - Claude 检测何时使用技能
+> "Commit these changes"        # 加载 git-commit
+> "Review this code for SOLID"  # 加载 solid-principles
 
-# Manual - invoke with slash command
+# 手动 - 使用斜杠命令调用
 > /git-commit
 > /solid-principles
 ```
 
-## Learn More
+## 了解更多
 
-- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills) - Official guide on creating and using skills
+- [Claude Code 技能文档](https://code.claude.com/docs/en/skills) - 关于创建和使用技能的官方指南

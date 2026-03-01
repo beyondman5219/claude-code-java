@@ -1,36 +1,35 @@
-# Design Principles for claude-code-java
+# claude-code-java 的设计原则
 
-This document explains the core philosophy behind the AI skills and workflows in this workspace.
+本文档解释了此工作区中 AI 技能和工作流的核心理念。
 
-## 1. Human-in-the-loop
+## 1. 人在回路中
 
-- **Developer decides**: The AI proposes changes; the developer reviews and approves.
-- **No automatic commits or writes to git** without explicit approval.
-- Skills generate outputs in a controlled environment, such as diffs or read-only views.
+- **开发者决策**：AI 提出更改；开发者审查并批准。
+- **未经明确批准不得自动 commit 或写入 git**。
+- 技能受控环境中生成输出，例如 diff 或只读视图。
 
-## 2. Reproducibility
+## 2. 可复现性
 
-- Skills are versioned and reusable.
-- Workflows should produce consistent results when rerun with the same context.
-- Metrics and outputs are measurable: token usage, time saved, coverage improvements.
+- 技能是版本化的且可复用。
+- 在相同上下文重新运行时，工作流应产生一致的结果。
+- 指标和输出是可测量的：token 使用量、节省的时间、覆盖率改进。
 
-## 3. Safety
+## 3. 安全性
 
-- AI should never modify files outside its defined scope.
-- Any skill that writes to disk should:
-  - indicate what files will change
-  - allow for review before application
+- AI 永远不应修改其定义范围之外的文件。
+- 任何写入磁盘的技能应该：
+  - 指示将更改哪些文件
+  - 允许在应用前进行审查
 
-## 4. Transparency
+## 4. 透明度
 
-- Every proposed change should be explainable:
-  - why the change is needed
-  - what files are affected
-- Logs or explanations should be available alongside diffs.
+- 每个提议的更改都应该是可解释的：
+  - 为什么需要更改
+  - 哪些文件受影响
+- 日志或解释应与 diff 一起提供。
 
-## 5. Incremental adoption
+## 5. 渐进式采用
 
-- Start with read-only / analysis skills.
-- Move to proposal skills.
-- Only then consider mutation skills with review.
-
+- 从只读/分析技能开始。
+- 转向提案技能。
+- 只有在考虑带审查的变更技能时。

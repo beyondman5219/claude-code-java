@@ -1,35 +1,34 @@
-# Safe Workflows for claude-code-java Skills
+# claude-code-java 技能的安全工作流
 
-This guide provides step-by-step workflows to maintain safety and control while using AI skills.
+本指南提供分步工作流，在使用 AI 技能时保持安全性和控制。
 
-## Workflow: Human-in-the-loop (Recommended)
+## 工作流：人在回路中（推荐）
 
-1. **Analyze**
-   - Use read-only skills to inspect code, tests, or issues.
-2. **Explain**
-   - AI summarizes findings, highlights potential changes.
-3. **Propose**
-   - AI generates a diff or suggested edits in a sandbox.
-4. **Review**
-   - Developer reviews all proposed changes.
-   - Approves/rejects file by file.
-5. **Apply**
-   - Changes are manually applied to project or git staging.
-6. **Commit**
-   - Developer commits changes to git.
-   - Optionally tag for auditing.
+1. **分析**
+   - 使用只读技能检查代码、测试或 issues。
+2. **说明**
+   - AI 总结发现，突出潜在更改。
+3. **提议**
+   - AI 在沙盒中生成 diff 或建议的编辑。
+4. **审查**
+   - 开发者审查所有提议的更改。
+   - 逐个文件批准/拒绝。
+5. **应用**
+   - 更改手动应用到项目或 git staging。
+6. **提交**
+   - 开发者将更改 commit 到 git。
+   - 可选地打标签用于审计。
 
-## Levels of Skill Access
+## 技能访问级别
 
-| Level | Description | Recommended? |
+| 级别 | 描述 | 推荐？ |
 |-------|------------|--------------|
-| 0 | Read-only analysis | ✅ Highly recommended |
-| 1 | Proposal skills (sandbox write) | ✅ Use with review |
-| 2 | Auto-apply writes | ⚠️ Only in very controlled experiments |
-| 3 | Auto git commits | ❌ Not recommended |
+| 0 | 只读分析 | ✅ 强烈推荐 |
+| 1 | 提案技能（沙盒写入） | ✅ 与审查一起使用 |
+| 2 | 自动应用写入 | ⚠️ 仅在非常受控的实验中 |
+| 3 | 自动 git commits | ❌ 不推荐 |
 
-## Notes
+## 注意事项
 
-- Always check diffs before approving.
-- Never rely solely on AI-generated decisions for public APIs or critical functionality.
-
+- 在批准之前始终检查 diffs。
+- 永远不要仅依赖 AI 生成的决策用于公共 API 或关键功能。

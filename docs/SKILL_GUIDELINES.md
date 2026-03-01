@@ -1,402 +1,402 @@
-# Skill Development Guidelines
+# 技能开发指南
 
-> How to design, validate, and implement new skills for claude-code-java
+> 如何为 claude-code-java 设计、验证和实现新技能
 
-## Purpose
+## 目的
 
-This guide helps contributors create high-quality skills that:
-- Fill genuine gaps (not duplicate existing functionality)
-- Provide clear, actionable value
-- Integrate well with the existing skill ecosystem
+本指南帮助贡献者创建高质量的技能：
+- 填补真正的空白（不重复现有功能）
+- 提供清晰、可操作的价值
+- 与现有技能生态系统良好集成
 
 ---
 
-## Before You Start: Validation Checklist
+## 开始之前：验证清单
 
-Before implementing a new skill, answer these questions:
+在实现新技能之前，回答这些问题：
 
-### 1. Does It Already Exist?
+### 1. 它是否已存在？
 
-Check overlap with existing skills:
+检查与现有技能的重叠：
 
-| Existing Skill | Level | Focus |
+| 现有技能 | 级别 | 重点 |
 |----------------|-------|-------|
-| clean-code | Micro | Functions, naming, DRY/KISS |
-| solid-principles | Micro/Meso | Classes, interfaces |
-| design-patterns | Meso | Class collaboration patterns |
-| java-code-review | Meso | Code review checklist |
-| architecture-review | Macro | Packages, modules, layers |
-| spring-boot-patterns | Framework | Spring Boot specifics |
-| jpa-patterns | Framework | JPA/Hibernate specifics |
-| security-audit | Cross-cutting | OWASP, input validation |
-| test-quality | Cross-cutting | JUnit 5, AssertJ |
+| clean-code | 微观 | 函数、命名、DRY/KISS |
+| solid-principles | 微观/中观 | 类、接口 |
+| design-patterns | 中观 | 类协作模式 |
+| java-code-review | 中观 | 代码审查清单 |
+| architecture-review | 宏观 | 包、模块、层 |
+| spring-boot-patterns | 框架 | Spring Boot 特定内容 |
+| jpa-patterns | 框架 | JPA/Hibernate 特定内容 |
+| security-audit | 横切 | OWASP、输入验证 |
+| test-quality | 横切 | JUnit 5、AssertJ |
 
-**Ask yourself:**
-- Does an existing skill cover >50% of what I want to add?
-- Would extending an existing skill be better than creating a new one?
+**问自己：**
+- 现有技能是否覆盖了我想要添加的 >50% 的内容？
+- 扩展现有技能是否比创建新技能更好？
 
-### 2. What Level Does It Operate At?
+### 2. 它在什么级别运行？
 
-Skills should have a clear scope:
+技能应该有清晰的范围：
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  Macro    │ Packages, modules, architecture     │
+│  宏观    │ 包、模块、架构     │
 ├───────────┼─────────────────────────────────────┤
-│  Meso     │ Classes, interfaces, collaboration  │
+│  中观     │ 类、接口、协作  │
 ├───────────┼─────────────────────────────────────┤
-│  Micro    │ Functions, variables, expressions   │
+│  微观    │ 函数、变量、表达式   │
 ├───────────┼─────────────────────────────────────┤
-│  Framework│ Spring, JPA, specific technologies  │
+│  框架│ Spring、JPA、特定技术  │
 ├───────────┼─────────────────────────────────────┤
-│  Cross    │ Security, testing, logging          │
+│  横切    │ 安全、测试、日志          │
 └───────────┴─────────────────────────────────────┘
 ```
 
-**Red flag:** A skill that tries to cover multiple levels is probably too broad.
+**警告信号：** 试图覆盖多个级别的技能可能太宽泛了。
 
-### 3. Is It "Audit" or "Template"?
+### 3. 它是"审计"还是"模板"？
 
-Two types of skills:
+两种类型的技能：
 
-| Type | Purpose | Example |
+| 类型 | 目的 | 示例 |
 |------|---------|---------|
-| **Audit** | Review existing code, find issues | java-code-review, security-audit |
-| **Template** | Show how to write new code | spring-boot-patterns, design-patterns |
+| **审计** | 审查现有代码，发现问题 | java-code-review、security-audit |
+| **模板** | 展示如何编写新代码 | spring-boot-patterns、design-patterns |
 
-**Ask yourself:**
-- Which type is my skill?
-- Does an existing skill of the same type already cover this?
+**问自己：**
+- 我的技能是哪种类型？
+- 同类型的现有技能是否已经覆盖了这一点？
 
-Example:
-- `spring-boot-patterns` = Template (how to write)
-- `api-contract-review` = Audit (check existing APIs)
-- Both deal with REST APIs, but serve different purposes ✅
+示例：
+- `spring-boot-patterns` = 模板（如何编写）
+- `api-contract-review` = 审计（检查现有 API）
+- 两者都处理 REST API，但服务不同的目的 ✅
 
-### 4. What Unique Value Does It Add?
+### 4. 它添加了什么独特价值？
 
-The skill should add something NEW:
+技能应该添加新的东西：
 
-**Good reasons for a new skill:**
-- Covers a topic no existing skill addresses
-- Same topic but different level (micro vs macro)
-- Same topic but different type (audit vs template)
-- Specialized depth that doesn't fit in a general skill
+**新技能的好理由：**
+- 覆盖现有技能未涉及的主题
+- 相同主题但不同级别（微观 vs 宏观）
+- 相同主题但不同类型（审计 vs 模板）
+- 不适合通用技能的专业深度
 
-**Bad reasons:**
-- "It would be nice to have"
-- "Other tools have this" (without validating the gap)
-- "I want to reorganize existing content"
+**坏理由：**
+- "有它会很好"
+- "其他工具有这个"（没有验证空白）
+- "我想重新组织现有内容"
 
-### 5. Is It Focused Enough?
+### 5. 它是否足够专注？
 
-A skill should be completable in one session. Signs it's too broad:
-- More than 10-15 checklist items
-- Covers multiple unrelated topics
-- Would take hours to apply fully
+一个技能应该在一个会话中可完成。太宽泛的迹象：
+- 超过 10-15 个清单项
+- 覆盖多个不相关的主题
+- 完全应用需要数小时
 
-**Solution:** Split into multiple focused skills.
+**解决方案：** 拆分为多个专注的技能。
 
 ---
 
-## Skill Anatomy
+## 技能解剖结构
 
-Every skill has two files:
+每个技能有两个文件：
 
 ```
 .claude/skills/<skill-name>/
-├── SKILL.md    # Instructions for Claude (AI reads this)
-└── README.md   # Documentation for humans
+├── SKILL.md    # Claude 的指令（AI 读取此文件）
+└── README.md   # 人类的文档
 ```
 
-### SKILL.md Structure
+### SKILL.md 结构
 
 ```markdown
 ---
 name: skill-name
-description: One-line description. Use when [triggers].
+description: 一行描述。何时使用 [触发器]。
 ---
 
 # Skill Name
 
-Brief intro (1-2 sentences).
+简要介绍（1-2 句话）。
 
-## When to Use
-- Trigger phrase 1
-- Trigger phrase 2
+## 何时使用
+- 触发短语 1
+- 触发短语 2
 
-## Quick Reference
-[Table or summary for fast lookup]
+## 快速参考
+[表格或摘要用于快速查找]
 
-## Main Content
-[Checklists, patterns, examples]
+## 主要内容
+[清单、模式、示例]
 
-## Token Optimization
-[How to use efficiently on large codebases]
+## Token 优化
+[如何在大型代码库上高效使用]
 ```
 
-### README.md Structure
+### README.md 结构
 
 ```markdown
 # Skill Name
 
-> One-line tagline
+> 一行标语
 
-## What It Does
-[2-3 sentences]
+## 它做什么
+[2-3 句话]
 
-## When to Use
-[Bullet points with example phrases]
+## 何时使用
+[带有示例短语的项目符号]
 
-## Key Concepts
-[Brief explanation of main ideas]
+## 核心概念
+[主要思想的简要解释]
 
-## Example Usage
-[Show a typical interaction]
+## 使用示例
+[显示典型交互]
 
-## Related Skills
-[Links to complementary skills]
+## 相关技能
+[互补技能的链接]
 
-## References
-[External resources]
+## 参考资料
+[外部资源]
 ```
 
 ---
 
-## Quality Standards
+## 质量标准
 
-### Content Guidelines
+### 内容指南
 
-1. **Be Specific to Java**
-   - Use Java syntax in examples
-   - Reference Java ecosystem tools (Maven, JUnit, Spring)
-   - Don't be generic - that's what other skills collections do
+1. **针对 Java**
+   - 在示例中使用 Java 语法
+   - 引用 Java 生态系统工具（Maven、JUnit、Spring）
+   - 不要通用 — 这是其他技能集合所做的
 
-2. **Provide Actionable Checklists**
-   - ✅ `- [ ] Check for null safety with Optional`
-   - ❌ `- [ ] Make sure code is good`
+2. **提供可操作的清单**
+   - ✅ `- [ ] 使用 Optional 检查空值安全`
+   - ❌ `- [ ] 确保代码良好`
 
-3. **Show Anti-Patterns**
+3. **展示反模式**
    ```java
-   // ❌ BAD: Why this is wrong
+   // ❌ 坏：为什么这是错的
    badCode();
 
-   // ✅ GOOD: Why this is right
+   // ✅ 好：为什么这是对的
    goodCode();
    ```
 
-4. **Include Severity Levels**
-   - High: Bugs, security issues, performance killers
-   - Medium: Code smells, maintainability issues
-   - Low: Style, minor optimizations
+4. **包含严重性级别**
+   - 高：Bug、安全问题、性能杀手
+   - 中：代码异味、可维护性问题
+   - 低：风格、次要优化
 
-### Token Efficiency
+### Token 效率
 
-Skills should help Claude work efficiently:
+技能应该帮助 Claude 高效工作：
 
-1. **Prioritize checks** - Most important first
-2. **Provide commands** - Shell commands to gather info quickly
-3. **Suggest sampling** - "Check 2-3 examples, not every file"
-4. **Exit early** - "If X, skip Y checks"
+1. **优先检查** - 最重要的在前
+2. **提供命令** - 用于快速收集信息的 Shell 命令
+3. **建议采样** - "检查 2-3 个示例，而不是每个文件"
+4. **提前退出** - "如果 X，跳过 Y 检查"
 
 ---
 
-## Validation Process
+## 验证过程
 
-Before submitting a new skill:
+在提交新技能之前：
 
-### Step 1: Gap Analysis
+### 步骤 1：空白分析
 
 ```markdown
-## Proposed: <skill-name>
+## 提议：<skill-name>
 
-### What it does
-[Description]
+### 它做什么
+[描述]
 
-### Overlap check
-| Existing Skill | Overlap? | Notes |
+### 重叠检查
+| 现有技能 | 重叠？ | 注意 |
 |----------------|----------|-------|
-| skill-1 | None/Partial/High | ... |
-| skill-2 | None/Partial/High | ... |
+| skill-1 | 无/部分/高 | ... |
+| skill-2 | 无/部分/高 | ... |
 
-### Unique value
-[What this adds that doesn't exist]
+### 独特价值
+[这添加了什么不存在的]
 
-### Verdict
-[ ] No significant overlap - proceed
-[ ] Partial overlap - document distinction
-[ ] High overlap - consider extending existing skill instead
+### 结论
+[ ] 无显著重叠 - 继续
+[ ] 部分重叠 - 记录区别
+[ ] 高重叠 - 考虑扩展现有技能
 ```
 
-### Step 2: Peer Review Questions
+### 步骤 2：同行评审问题
 
-Ask yourself (or a reviewer):
+问自己（或审查者）：
 
-1. Would I actually use this skill in a real project?
-2. Can I explain in one sentence when to use it vs related skills?
-3. Does the checklist have <15 items?
-4. Are all examples in Java (not pseudocode)?
+1. 我会在真实项目中实际使用这个技能吗？
+2. 我能否用一句话解释何时使用它 vs 相关技能？
+3. 清单是否少于 15 项？
+4. 所有示例都是 Java 的（不是伪代码）吗？
 
-### Step 3: Test on Real Code
+### 步骤 3：真实代码测试
 
-Before committing:
-- Apply the skill to a real Java project
-- Verify the checklist makes sense
-- Check that recommendations are actionable
+在提交之前：
+- 将技能应用于真实的 Java 项目
+- 验证清单有意义
+- 检查建议是否可操作
 
-### Automated Review
+### 自动化审查
 
-PRs that modify `.claude/skills/` are automatically reviewed against these guidelines.
-The review checks:
-- **Structure**: frontmatter, required files, folder convention
-- **Overlap**: comparison with existing skills
-- **Quality**: actionable content, Java-specific examples, focused scope
+修改 `.claude/skills/` 的 PR 会根据这些指南自动审查。
+审查检查：
+- **结构**：frontmatter、必需文件、文件夹约定
+- **重叠**：与现有技能的比较
+- **质量**：可操作的内容、Java 特定示例、专注的范围
 
-This automated check runs before human review to catch common issues early.
+此自动检查在人工审查之前运行，以便及早发现常见问题。
 
 ---
 
-## Anti-Patterns to Avoid
+## 要避免的反模式
 
-### 1. The Kitchen Sink
+### 1. 全能型
 
-❌ **Bad:** A skill that tries to cover everything
+❌ **坏：** 试图覆盖所有内容的技能
 ```
 java-best-practices/
-  - Covers coding style
-  - AND testing
-  - AND architecture
-  - AND security
-  - AND performance
+  - 覆盖代码风格
+  - AND 测试
+  - AND 架构
+  - AND 安全
+  - AND 性能
 ```
 
-✅ **Good:** Focused skills that compose well
+✅ **好：** 专注的技能，组合良好
 
-### 2. The Overlap Trap
+### 2. 重叠陷阱
 
-❌ **Bad:** Creating `exception-handling-review` when `java-code-review` already has an exceptions section
+❌ **坏：** 当 `java-code-review` 已经有异常部分时创建 `exception-handling-review`
 
-✅ **Good:** Extend `java-code-review` or ensure the new skill has a clearly different scope
+✅ **好：** 扩展 `java-code-review` 或确保新技能有明显不同的范围
 
-### 3. The Copy-Paste Skill
+### 3. 复制粘贴技能
 
-❌ **Bad:** Copying generic advice from the internet
+❌ **坏：** 从互联网复制通用建议
 
-✅ **Good:** Java-specific, opinionated, practical guidance
+✅ **好：** Java 特定的、有观点的、实用的指导
 
-### 4. The Theoretical Skill
+### 4. 理论技能
 
-❌ **Bad:** Explaining concepts without actionable checks
+❌ **坏：** 在没有可操作检查的情况下解释概念
 
-✅ **Good:** Checklists that can be applied immediately
+✅ **好：** 可以立即应用的清单
 
 ---
 
-## Extending vs Creating
+## 扩展 vs 创建
 
-Sometimes extending an existing skill is better:
+有时扩展现有技能更好：
 
-### When to Extend
+### 何时扩展
 
-- Adding <5 new checklist items
-- Same level and type as existing skill
-- Naturally fits the existing structure
+- 添加 <5 个新清单项
+- 与现有技能相同的级别和类型
+- 自然适合现有结构
 
-### When to Create New
+### 何时创建新的
 
-- Different level (micro vs macro)
-- Different type (audit vs template)
-- Would make existing skill too long (>200 lines)
-- Distinct trigger phrases
+- 不同级别（微观 vs 宏观）
+- 不同类型（审计 vs 模板）
+- 会使现有技能太长（>200 行）
+- 不同的触发短语
 
-### How to Extend
+### 如何扩展
 
-1. Read the existing skill thoroughly
-2. Identify where new content fits
-3. Add new section or expand existing
-4. Update README if needed
-5. Commit with clear message: `enhance(skill-name): add X checks`
-
----
-
-## Commit Convention
-
-For skill changes:
-
-```
-feat: add <skill-name> skill          # New skill
-enhance(<skill-name>): add X checks   # Extend existing
-fix(<skill-name>): correct Y example  # Fix issues
-docs(<skill-name>): improve Z section # Documentation only
-```
+1. 彻底阅读现有技能
+2. 确定新内容适合的位置
+3. 添加新部分或扩展现有部分
+4. 如需要更新 README
+5. 提交并附带清晰消息：`enhance(skill-name): add X checks`
 
 ---
 
-## Iterative Improvement
+## 提交约定
 
-Skills improve through real usage. A skill is never "done" after the first version.
+对于技能更改：
 
-### Signs a Skill Needs Refinement
+```
+feat: add <skill-name> skill          # 新技能
+enhance(<skill-name>): add X checks   # 扩展现有技能
+fix(<skill-name>): correct Y example  # 修复问题
+docs(<skill-name>): improve Z section # 仅文档
+```
 
-| Signal | Problem | Solution |
+---
+
+## 迭代改进
+
+技能通过实际使用不断改进。第一个版本后技能永远不会"完成"。
+
+### 技能需要精炼的信号
+
+| 信号 | 问题 | 解决方案 |
 |--------|---------|----------|
-| Claude asks clarifying questions | Missing context or defaults | Add explicit defaults and examples |
-| You frequently correct the output | Missing constraints | Add "DO NOT" rules or format specs |
-| Output varies too much | Too vague | Add concrete examples of expected output |
-| Works on one project, fails on another | Too narrow | Generalize patterns, add edge cases |
-| Takes many iterations to get right | Missing structure | Add step-by-step workflow |
+| Claude 问澄清问题 | 缺少上下文或默认值 | 添加明确的默认值和示例 |
+| 你经常更正输出 | 缺少约束 | 添加"不要"规则或格式规范 |
+| 输出变化太大 | 太模糊 | 添加预期输出的具体示例 |
+| 在一个项目上工作，在另一个项目上失败 | 太窄 | 概括模式，添加边缘情况 |
+| 需要多次迭代才能正确 | 缺少结构 | 添加分步工作流 |
 
-### Improvement Workflow
+### 改进工作流
 
-1. **Use the skill** on real work
-2. **Note every correction** you make to Claude's output
-3. **Update SKILL.md** with the correction as a rule
-4. **Clear context** and test again
-5. **Repeat 5-6 times** until stable
+1. 在真实工作**上使用技能**
+2. **记下你对 Claude 输出的每次更正**
+3. **用更正作为规则更新 SKILL.md**
+4. **清除上下文**并再次测试
+5. **重复 5-6 次**直到稳定
 
-### Maturity Indicators
+### 成熟度指标
 
-A skill is mature when:
-- Works on first try >80% of the time
-- No steering or corrections needed
-- Output is copy-paste ready
-- Works across different projects
+一个技能在以下情况下成熟：
+- 首次尝试 >80% 的时间有效
+- 不需要引导或更正
+- 输出可复制粘贴
+- 跨不同项目工作
 
-### Optional: Track Iterations
+### 可选：跟踪迭代
 
-Consider adding to your skill folder:
+考虑添加到你的技能文件夹：
 
 ```
 .claude/skills/<skill-name>/
 ├── SKILL.md
 ├── README.md
-└── CHANGELOG.md   # Optional: track refinements
+└── CHANGELOG.md   # 可选：跟踪精炼
 ```
 
-Example CHANGELOG.md:
+示例 CHANGELOG.md：
 ```markdown
-## Iteration History
-- v1: Initial version, too vague
-- v2: Added output format specification
-- v3: Added "avoid" list after common mistakes
-- v4: Added examples for edge cases
-- v5: Stable - tested on 3 projects
+## 迭代历史
+- v1：初始版本，太模糊
+- v2：添加了输出格式规范
+- v3：在常见错误后添加了"避免"列表
+- v4：添加了边缘情况示例
+- v5：稳定 - 在 3 个项目上测试
 ```
 
 ---
 
-## Checklist Summary
+## 清单摘要
 
-Before submitting a new skill:
+在提交新技能之前：
 
-- [ ] Checked overlap with all existing skills
-- [ ] Identified clear level (micro/meso/macro/framework/cross)
-- [ ] Determined type (audit vs template)
-- [ ] Documented unique value added
-- [ ] SKILL.md follows structure convention
-- [ ] README.md provides human-friendly docs
-- [ ] All examples are Java-specific
-- [ ] Checklist has <15 actionable items
-- [ ] Tested on real code
-- [ ] Updated skills/README.md table
-- [ ] Updated main README.md if needed
+- [ ] 检查与所有现有技能的重叠
+- [ ] 确定清晰的级别（微观/中观/宏观/框架/横切）
+- [ ] 确定类型（审计 vs 模板）
+- [ ] 记录添加的独特价值
+- [ ] SKILL.md 遵循结构约定
+- [ ] README.md 提供人类友好的文档
+- [ ] 所有示例都是 Java 特定的
+- [ ] 清单有 <15 个可操作项
+- [ ] 在真实代码上测试
+- [ ] 更新 skills/README.md 表
+- [ ] 如需要更新主 README.md

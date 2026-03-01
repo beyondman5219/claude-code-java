@@ -1,56 +1,56 @@
-# Scripts Guide
+# 脚本指南
 
-> How the setup scripts work and how to extend them
+> 设置脚本的工作原理以及如何扩展它们
 
-## Available Scripts
+## 可用脚本
 
-| Script | Purpose |
+| 脚本 | 用途 |
 |--------|---------|
-| `setup-project.sh` | Orchestrates full project setup (runs all scripts below) |
-| `link-skills.sh` | Creates `.claude/` directory and symlinks skills |
-| `generate-claude-md.sh` | Generates `CLAUDE.md` from template |
-| `configure-mcp.sh` | Generates MCP config and optionally adds servers |
-| `configure-settings.sh` | Copies Claude Code settings with pre-approved commands |
-| `test-all.sh` | Runs all tests to validate scripts work |
+| `setup-project.sh` | 编排完整项目设置（运行下面的所有脚本） |
+| `link-skills.sh` | 创建 `.claude/` 目录并符号链接技能 |
+| `generate-claude-md.sh` | 从模板生成 `CLAUDE.md` |
+| `configure-mcp.sh` | 生成 MCP 配置并可选地添加服务器 |
+| `configure-settings.sh` | 复制带有预批准命令的 Claude Code 设置 |
+| `test-all.sh` | 运行所有测试以验证脚本工作 |
 
-## Usage
+## 使用方法
 
-### Full Setup (Recommended)
+### 完整设置（推荐）
 
 ```bash
 cd /path/to/claude-code-java
 ./scripts/setup-project.sh /path/to/your-java-project
 ```
 
-### Individual Scripts
+### 单独脚本
 
 ```bash
-# Just link skills
+# 仅链接技能
 ./scripts/link-skills.sh /path/to/your-java-project
 
-# Just generate CLAUDE.md
+# 仅生成 CLAUDE.md
 ./scripts/generate-claude-md.sh /path/to/your-java-project
 
-# Just configure MCP
+# 仅配置 MCP
 ./scripts/configure-mcp.sh /path/to/your-java-project
 
-# Just configure settings
+# 仅配置 settings
 ./scripts/configure-settings.sh /path/to/your-java-project
 ```
 
-### Run Tests
+### 运行测试
 
 ```bash
 ./scripts/test-all.sh
 ```
 
-## Conventions
+## 约定
 
-All scripts follow the same structure for consistency and reliability.
+所有脚本遵循相同的结构以确保一致性和可靠性。
 
-### Path Resolution Pattern
+### 路径解析模式
 
-Every script starts with:
+每个脚本都以以下内容开头：
 
 ```bash
 #!/bin/bash
@@ -62,44 +62,44 @@ WORKSPACE_DIR="$(dirname "$SCRIPT_DIR")"
 PROJECT_DIR="$(cd "${1:-.}" && pwd)"
 ```
 
-**Why this matters:**
-- `SCRIPT_DIR` - absolute path to scripts/ directory
-- `WORKSPACE_DIR` - absolute path to claude-code-java root
-- `PROJECT_DIR` - absolute path to target project (argument or current dir)
+**为什么这很重要：**
+- `SCRIPT_DIR` - scripts/ 目录的绝对路径
+- `WORKSPACE_DIR` - claude-code-java 根目录的绝对路径
+- `PROJECT_DIR` - 目标项目的绝对路径（参数或当前目录）
 
-This ensures scripts work correctly regardless of:
-- Where you run them from
-- Whether paths have spaces
-- Symlinks in the path
+这确保脚本无论以下情况都能正确工作：
+- 你从哪里运行它们
+- 路径是否包含空格
+- 路径中的符号链接
 
-### No `cd` Rule
+### 禁止 `cd` 规则
 
-Scripts should NOT use `cd` to change directories. Instead, use absolute paths:
+脚本不应使用 `cd` 来更改目录。相反，使用绝对路径：
 
 ```bash
-# Good
+# 好的做法
 [ -d "$PROJECT_DIR/.claude" ] && mkdir -p "$PROJECT_DIR/.claude"
 
-# Bad
+# 坏的做法
 cd "$PROJECT_DIR"
 [ -d .claude ] && mkdir -p .claude
 ```
 
-**Why:** After `cd`, relative paths to templates/workspace resources break.
+**原因：** `cd` 后，到模板/工作区资源的相对路径会中断。
 
-### Template Files
+### 模板文件
 
-Templates live in `templates/` and use `{{PLACEHOLDER}}` syntax:
+模板位于 `templates/` 中并使用 `{{PLACEHOLDER}}` 语法：
 
 ```
 templates/
 ├── CLAUDE.md.template        # {{PROJECT_NAME}}, {{REPO_NAME}}, {{DATE}}
 ├── mcp-config.json.template  # {{PROJECT_ROOT}}, {{GITHUB_REPO}}
 ├── MCP_CONFIG.md.template    # {{PROJECT_ROOT}}, {{GITHUB_REPO}}
-└── settings.json.template    # Pre-approved Maven/Git commands
+└── settings.json.template    # 预批准的 Maven/Git 命令
 ```
 
-Scripts use `sed` to replace placeholders:
+脚本使用 `sed` 来替换占位符：
 
 ```bash
 sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
@@ -107,37 +107,37 @@ sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
     "$TEMPLATE_FILE" > "$OUTPUT_FILE"
 ```
 
-### Error Handling
+### 错误处理
 
-All scripts use `set -e` to exit on first error. For checks that shouldn't stop execution:
+所有脚本使用 `set -e` 在第一个错误时退出。对于不应停止执行的检查：
 
 ```bash
-# This will exit script if file missing
+# 如果文件丢失，这将退出脚本
 [ ! -f "$FILE" ] && echo "Error" && exit 1
 
-# This continues even if command fails
+# 即使命令失败也会继续
 some_command || true
 ```
 
-### Output Messages
+### 输出消息
 
-Use consistent formatting:
+使用一致的格式：
 
 ```bash
-echo "✅ Success message"
-echo "❌ Error message"
-echo "ℹ️  Info message"
-echo "⚠️  Warning message"
+echo "✅ 成功消息"
+echo "❌ 错误消息"
+echo "ℹ️  信息消息"
+echo "⚠️  警告消息"
 ```
 
-## Adding a New Script
+## 添加新脚本
 
-1. Create file in `scripts/`:
+1. 在 `scripts/` 中创建文件：
 
 ```bash
 #!/bin/bash
-# new-script.sh - Brief description
-# Usage: ./new-script.sh [project-directory]
+# new-script.sh - 简要描述
+# 用法：./new-script.sh [project-directory]
 
 set -e
 
@@ -146,32 +146,32 @@ WORKSPACE_DIR="$(dirname "$SCRIPT_DIR")"
 
 PROJECT_DIR="$(cd "${1:-.}" && pwd)"
 
-# Your logic here using absolute paths
+# 使用绝对路径的逻辑在这里
 ```
 
-2. Make executable:
+2. 使其可执行：
 
 ```bash
 chmod +x scripts/new-script.sh
 ```
 
-3. Add tests to `test-all.sh`:
+3. 在 `test-all.sh` 中添加测试：
 
 ```bash
-# Test N: new-script.sh
+# 测试 N：new-script.sh
 echo "Testing new-script.sh..."
 "$SCRIPT_DIR/new-script.sh" "$TEST_DIR" > /dev/null 2>&1
 check "expected result" [ -f "$TEST_DIR/expected-file" ]
 echo ""
 ```
 
-4. Update this documentation.
+4. 更新此文档。
 
-## Script Dependencies
+## 脚本依赖关系
 
 ```
 setup-project.sh
-    ├── link-skills.sh      (no dependencies)
+    ├── link-skills.sh      （无依赖）
     ├── generate-claude-md.sh
     │       └── templates/CLAUDE.md.template
     ├── configure-mcp.sh
@@ -181,22 +181,22 @@ setup-project.sh
             └── templates/settings.json.template
 ```
 
-## Troubleshooting
+## 故障排除
 
-### "Template not found"
+### "Template not found"（模板未找到）
 
-Script can't find template file. Check:
-- You're running from workspace directory, OR
-- Script correctly resolves WORKSPACE_DIR
+脚本无法找到模板文件。检查：
+- 你从工作区目录运行，或
+- 脚本正确解析 WORKSPACE_DIR
 
-### "Permission denied"
+### "Permission denied"（权限被拒绝）
 
-Scripts need execute permission:
+脚本需要执行权限：
 
 ```bash
 chmod +x scripts/*.sh
 ```
 
-### Symlink issues on Windows
+### Windows 上的符号链接问题
 
-Windows requires developer mode or admin rights for symlinks. Consider using WSL or copying files instead of symlinking.
+Windows 需要开发者模式或管理员权限才能创建符号链接。考虑使用 WSL 或复制文件而不是符号链接。

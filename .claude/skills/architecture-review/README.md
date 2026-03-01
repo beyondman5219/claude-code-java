@@ -1,34 +1,34 @@
 # Architecture Review Skill
 
-> Macro-level analysis of Java project structure, packages, and dependency direction
+> Java 项目结构、package 和依赖方向的宏观层面分析
 
-## What It Does
+## 功能描述
 
-Analyzes project architecture at a high level:
-- Package organization (by-layer vs by-feature vs hexagonal)
-- Dependency direction between layers
-- Module boundaries and coupling
-- Architectural anti-patterns (god packages, anemic domain, etc.)
+在高层级分析项目架构：
+- Package 组织（按层 vs 按功能 vs 六边形架构）
+- 层之间的依赖方向
+- 模块边界和耦合
+- 架构反模式（god packages、贫血领域等）
 
-## When to Use
+## 何时使用
 
 - "Review the architecture of this project"
 - "Is this package structure good?"
 - "Check if we follow clean architecture"
 - "Find architectural violations"
-- Before major refactoring efforts
+- 重大重构工作之前
 
-## Key Concepts
+## 核心概念
 
-### Package Strategies
+### Package 策略
 
-| Strategy | Best For | Trade-off |
+| Strategy | 最适合 | 权衡 |
 |----------|----------|-----------|
-| By-layer | Small projects, quick start | Scatters related code |
-| By-feature | Medium projects, clear modules | Need shared kernel |
-| Hexagonal | Complex domains, testability | More ceremony |
+| By-layer | 小型项目、快速开始 | 分散相关代码 |
+| By-feature | 中型项目、清晰的模块 | 需要共享内核 |
+| Hexagonal | 复杂领域、可测试性 | 更多仪式 |
 
-### Dependency Direction
+### 依赖方向
 
 ```
 Outer (Framework) → Adapters → Application → Domain (Inner)
@@ -36,32 +36,32 @@ Outer (Framework) → Adapters → Application → Domain (Inner)
 Rule: Dependencies point INWARD only
 ```
 
-## Example Usage
+## 使用示例
 
 ```
 You: Review the architecture of this project
 
-Claude: [Analyzes package structure]
-        [Checks dependency direction]
-        [Identifies violations]
-        [Provides prioritized recommendations]
+Claude: [分析 package 结构]
+        [检查依赖方向]
+        [识别违规]
+        [提供优先级建议]
 ```
 
-## What It Checks
+## 检查内容
 
-1. **Package Structure** - Organization, naming consistency
-2. **Dependency Direction** - Domain isolation, no framework leaks
-3. **Layer Boundaries** - Proper separation of concerns
-4. **Module Boundaries** - Clear APIs, encapsulation
-5. **Scalability** - Could features be extracted?
+1. **Package Structure** - 组织、命名一致性
+2. **Dependency Direction** - 领域隔离、无框架泄漏
+3. **Layer Boundaries** - 适当的关注点分离
+4. **Module Boundaries** - 清晰的 API、封装
+5. **Scalability** - 功能是否可以被提取？
 
-## Related Skills
+## 相关技能
 
-- `solid-principles` - Class-level design (this skill is package/module level)
-- `design-patterns` - Implementation patterns (this skill is structural)
-- `clean-code` - Code quality (this skill is architectural quality)
+- `solid-principles` - 类级别设计（此技能是 package/模块级别）
+- `design-patterns` - 实现模式（此技能是结构性的）
+- `clean-code` - 代码质量（此技能是架构质量）
 
-## References
+## 参考资料
 
 - [Clean Architecture (Uncle Bob)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/)

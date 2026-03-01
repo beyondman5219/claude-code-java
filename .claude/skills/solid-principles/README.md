@@ -4,24 +4,24 @@
 
 ---
 
-## Description
+## 描述
 
-SOLID principles checklist with detailed Java examples. Each principle includes violation examples, refactored solutions, and detection patterns.
+SOLID 原则清单，包含详细的 Java 示例。每个原则包括违反示例、重构解决方案和检测模式。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Check this class for SOLID violations"
-- "Is this class doing too much?" (SRP)
-- "How do I add new types without modifying code?" (OCP)
-- "Why shouldn't Square extend Rectangle?" (LSP)
-- "This interface is too big" (ISP)
-- "How to make this testable?" (DIP)
+- "Is this class doing too much?"（SRP）
+- "How do I add new types without modifying code?"（OCP）
+- "Why shouldn't Square extend Rectangle?"（LSP）
+- "This interface is too big"（ISP）
+- "How to make this testable?"（DIP）
 
 ---
 
-## Examples
+## 示例
 
 ```
 > view .claude/skills/solid-principles/SKILL.md
@@ -31,27 +31,27 @@ SOLID principles checklist with detailed Java examples. Each principle includes 
 
 ---
 
-## Principles Covered
+## 涵盖的原则
 
-| Principle | Key Question |
+| Principle | 关键问题 |
 |-----------|--------------|
-| **S**ingle Responsibility | Does it have one reason to change? |
-| **O**pen/Closed | Can I extend without modifying? |
-| **L**iskov Substitution | Can subtypes replace base types? |
-| **I**nterface Segregation | Are clients forced to implement unused methods? |
-| **D**ependency Inversion | Does it depend on abstractions? |
+| **S**ingle Responsibility | 它是否只有一个变更原因？ |
+| **O**pen/Closed | 我是否可以在不修改的情况下扩展？ |
+| **L**iskov Substitution | 子类型是否可以替换基类型？ |
+| **I**nterface Segregation | 客户端是否被迫实现未使用的方法？ |
+| **D**ependency Inversion | 它是否依赖于抽象？ |
 
 ---
 
-## Related Skills
+## 相关技能
 
-- `design-patterns` - Implementation patterns
-- `clean-code` - DRY, KISS, YAGNI
-- `java-code-review` - Full review checklist
+- `design-patterns` - 实现模式
+- `clean-code` - DRY、KISS、YAGNI
+- `java-code-review` - 完整审查清单
 
 ---
 
-## Resources
+## 参考资料
 
 - [SOLID (Wikipedia)](https://en.wikipedia.org/wiki/SOLID)
 - [Clean Code by Robert C. Martin](https://www.oreilly.com/library/view/clean-code-a/9780136083238/)

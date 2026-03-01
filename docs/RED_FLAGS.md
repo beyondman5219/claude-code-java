@@ -1,23 +1,22 @@
-# Red Flags for AI-generated Changes
+# AI 生成更改的警告信号
 
-Watch for these indicators in diffs or proposed edits:
+在 diff 或提议的编辑中留意这些指标：
 
-## Code-level Red Flags
+## 代码级警告信号
 
-- Unexpected formatting changes (cosmetic only)
-- Imports removed or added without reason
-- Large-scale renaming or moving files
-- Logic refactor that changes behavior subtly
+- 意外的格式更改（仅外观）
+- 无故删除或添加导入
+- 大规模重命名或移动文件
+- 逻辑重构微妙地改变行为
 
-## Workflow-level Red Flags
+## 工作流级警告信号
 
-- AI proposes changes outside its skill scope
-- AI ignores previous instructions about restricted files
-- Changes are not accompanied by explanations
+- AI 提出超出其技能范围的更改
+- AI 忽略关于受限文件的先前指令
+- 更改未附带说明
 
-## Mitigation Strategies
+## 缓解策略
 
-- Reject or pause changes until clarified
-- Ask AI to provide rationale for every file modified
-- Keep a backup or sandbox for testing diffs
-
+- 拒绝或暂停更改直到澄清
+- 要求 AI 为每个修改的文件提供理由
+- 保留备份或沙盒用于测试 diff

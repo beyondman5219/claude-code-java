@@ -4,13 +4,13 @@
 
 ---
 
-## Description
+## 描述
 
-Step-by-step guide for upgrading Java projects between major LTS versions (8→11→17→21→25). Includes breaking changes, removed APIs, new features to adopt, and framework-specific migrations (Spring Boot, Hibernate).
+在主要 LTS 版本之间升级 Java 项目的分步指南（8→11→17→21→25）。包括破坏性更改、移除的 API、采用的新功能以及特定于框架的迁移（Spring Boot、Hibernate）。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Upgrade project to Java 25"
 - "Migrate from Java 21 to 25"
@@ -20,7 +20,7 @@ Step-by-step guide for upgrading Java projects between major LTS versions (8→1
 
 ---
 
-## Examples
+## 示例
 
 ```
 > view .claude/skills/java-migration/SKILL.md
@@ -30,39 +30,39 @@ Step-by-step guide for upgrading Java projects between major LTS versions (8→1
 
 ---
 
-## Migration Paths Covered
+## 涵盖的迁移路径
 
-| From | To | Key Changes |
+| From | To | 关键更改 |
 |------|-----|-------------|
-| Java 8 | Java 11 | JAXB removed, module system, internal APIs |
-| Java 11 | Java 17 | Records, sealed classes, strong encapsulation |
-| Java 17 | Java 21 | Virtual threads, pattern matching, sequenced collections |
-| Java 21 | Java 25 | Security Manager removed, Unsafe removed, Scoped Values final |
-| Spring Boot 2.x | 3.x | javax.* → jakarta.*, Java 17 required |
-| Hibernate 5 | 6 | Query API changes, ID generation |
+| Java 8 | Java 11 | JAXB 移除、模块系统、内部 API |
+| Java 11 | Java 17 | Records、sealed classes、强封装 |
+| Java 17 | Java 21 | Virtual threads、pattern matching、sequenced collections |
+| Java 21 | Java 25 | Security Manager 移除、Unsafe 移除、Scoped Values final |
+| Spring Boot 2.x | 3.x | javax.* → jakarta.*、需要 Java 17 |
+| Hibernate 5 | 6 | Query API 更改、ID 生成 |
 
 ---
 
-## Tools Used
+## 使用的工具
 
 | Tool | Purpose |
 |------|---------|
-| `grep` | Find deprecated API usage |
-| `mvn compile` | Identify compilation errors |
-| OpenRewrite | Automated Spring Boot 3 migration |
-| `--add-opens` | Fix reflection access issues |
+| `grep` | 查找已弃用的 API 使用 |
+| `mvn compile` | 识别编译错误 |
+| OpenRewrite | 自动 Spring Boot 3 迁移 |
+| `--add-opens` | 修复反射访问问题 |
 
 ---
 
-## Notes / Tips
+## 注意事项 / 提示
 
-- Always migrate LTS → LTS (8→11→17→21→25)
-- Update Lombok, Mockito to latest versions first
-- Use OpenRewrite for automated migrations
-- Test thoroughly after each step
-- Java 25 LTS support until September 2033
+- 始终迁移 LTS → LTS（8→11→17→21→25）
+- 首先更新 Lombok、Mockito 到最新版本
+- 使用 OpenRewrite 进行自动迁移
+- 每步后彻底测试
+- Java 25 LTS 支持到 2033 年 9 月
 
-## References
+## 参考资料
 
 - [Oracle JDK 25 Migration Guide](https://docs.oracle.com/en/java/javase/25/migrate/)
 - [Oracle JDK 25 Release Notes](https://www.oracle.com/java/technologies/javase/25-relnote-issues.html)

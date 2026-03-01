@@ -1,82 +1,82 @@
 # Concurrency Review Skill
 
-> Review Java concurrent code for thread safety, race conditions, and modern patterns
+> 审查 Java 并发代码的线程安全性、竞态条件和现代模式
 
-## What It Does
+## 功能描述
 
-Reviews multi-threaded Java code for:
-- Race conditions and visibility issues
-- Deadlock potential
-- Modern patterns (Virtual Threads, Structured Concurrency)
-- Spring @Async pitfalls
-- CompletableFuture error handling
-- Thread pool configuration
+审查多线程 Java 代码：
+- 竞态条件和可见性问题
+- 死锁可能性
+- 现代模式（Virtual Threads、Structured Concurrency）
+- Spring @Async 陷阱
+- CompletableFuture 错误处理
+- 线程池配置
 
-## Why It Matters
+## 为什么重要
 
-> Nearly 60% of multithreaded applications encounter issues due to improper management of shared resources.
+> 近 60% 的多线程应用程序由于共享资源管理不当而遇到问题。
 
-Concurrency bugs are hard to reproduce, hard to test, and hard to debug. Catching them in code review is far better than finding them in production.
+并发 bugs 难以复现、难以测试、难以调试。在代码审查中捕获它们比在生产中发现它们要好得多。
 
-## When to Use
+## 何时使用
 
 - "Review this for thread safety"
 - "Check concurrency issues"
 - "Is this async code correct?"
-- Reviewing code with `synchronized`, `volatile`, `@Async`
-- Checking `CompletableFuture` or `ExecutorService` usage
+- 审查包含 `synchronized`、`volatile`、`@Async` 的代码
+- 检查 `CompletableFuture` 或 `ExecutorService` 使用
 
-## Key Topics Covered
+## 涵盖的核心主题
 
 ### Modern Java (21/25)
-| Topic | What to Check |
+| Topic | 检查内容 |
 |-------|---------------|
-| Virtual Threads | Use for I/O-bound, not CPU-bound |
-| Structured Concurrency | Proper scope management |
-| ScopedValue | Prefer over ThreadLocal |
+| Virtual Threads | 用于 I/O 密集型，而非 CPU 密集型 |
+| Structured Concurrency | 正确的作用域管理 |
+| ScopedValue | 优于 ThreadLocal |
 
 ### Spring @Async
 | Pitfall | Issue |
 |---------|-------|
-| Same-class call | Bypasses proxy, runs sync |
-| Non-public method | Proxy can't intercept |
-| Default executor | Creates thread per task (OOM risk) |
-| SecurityContext | ThreadLocal doesn't propagate |
+| 同类调用 | 绕过代理，同步运行 |
+| 非公共方法 | 代理无法拦截 |
+| 默认 executor | 每个任务创建线程（OOM 风险） |
+| SecurityContext | ThreadLocal 不会传播 |
 
 ### Classic Issues
 | Issue | Example |
 |-------|---------|
-| Race condition | Check-then-act without sync |
-| Visibility | Missing volatile |
-| Deadlock | Inconsistent lock ordering |
+| 竞态条件 | 没有同步的 check-then-act |
+| 可见性 | 缺少 volatile |
+| 死锁 | 不一致的锁顺序 |
 
-## Example Usage
+## 使用示例
 
 ```
 You: Review this service for thread safety
 
-Claude: [Checks shared mutable state]
-        [Validates synchronization]
-        [Reviews @Async configuration]
-        [Checks CompletableFuture error handling]
-        [Suggests modern alternatives if applicable]
+Claude: [检查共享可变状态]
+        [验证同步]
+        [审查 @Async 配置]
+        [检查 CompletableFuture 错误处理]
+        [如适用，建议现代替代方案]
 ```
 
-## Severity Levels
+## 严重性级别
 
-| Level | Meaning |
+| Level | 含义 |
 |-------|---------|
-| 🔴 High | Likely bug - race condition, deadlock risk |
-| 🟡 Medium | Potential issue - measure/verify |
-| 🟢 Modern | Opportunity for Java 21/25 patterns |
+| 🔴 High | 可能是 bug - 竞态条件、死锁风险 |
+| 🟡 Medium | 潜在问题 - 需要测量/验证 |
+| 🟢 Modern | Java 21/25 模式的机会 |
 
-## Related Skills
+## 相关技能
 
-- `performance-smell-detection` - Performance issues (not thread safety)
-- `java-code-review` - General code review (includes basic concurrency)
-- `spring-boot-patterns` - Spring patterns (includes @Async basics)
+- `performance-smell-detection` - 性能问题（非线程安全）
+- `java-code-review` - 通用代码审查（包括基础并发）
+- `spring-boot-patterns` - Spring 模式（包括 @Async 基础）
 
-## References
+## 参考资料
 
 - [Java Concurrency Code Review Checklist](https://github.com/code-review-checklists/java-concurrency)
 - [Baeldung - Common Concurrency Pitfalls](https://www.baeldung.com/java-common-concurrency-pitfalls)

@@ -1,180 +1,180 @@
 ---
 name: java-code-review
-description: Systematic code review for Java with null safety, exception handling, concurrency, and performance checks. Use when user says "review code", "check this PR", "code review", or before merging changes.
+description: Java 的系统化代码审查，包含空值安全、异常处理、并发和性能检查。当用户说 "review code"、"check this PR"、"code review" 或在合并更改之前使用。
 ---
 
-# Java Code Review Skill
+# Java 代码审查技能
 
-Systematic code review checklist for Java projects.
+Java 项目的系统化代码审查清单。
 
-## When to Use
-- User says "review this code" / "check this PR" / "code review"
-- Before merging a PR
-- After implementing a feature
+## 何时使用
+- 用户说 "review this code" / "check this PR" / "code review"
+- 在合并 PR 之前
+- 在实现功能之后
 
-## Review Strategy
+## 审查策略
 
-1. **Quick scan** - Understand intent, identify scope
-2. **Checklist pass** - Go through each category below
-3. **Summary** - List findings by severity (Critical → Minor)
+1. **快速扫描** - 了解意图，识别范围
+2. **清单检查** - 检查下面的每个类别
+3. **总结** - 按严重性列出发现（严重 → 次要）
 
-## Output Format
+## 输出格式
 
 ```markdown
-## Code Review: [file/feature name]
+## 代码审查：[文件/功能名称]
 
-### Critical
-- [Issue description + line reference + suggestion]
+### 严重
+- [问题描述 + 行引用 + 建议]
 
-### Improvements
-- [Suggestion + rationale]
+### 改进
+- [建议 + 理由]
 
-### Minor/Style
-- [Nitpicks, optional improvements]
+### 次要/风格
+- [吹毛求疵、可选改进]
 
-### Good Practices Observed
-- [Positive feedback - important for morale]
+### 观察到的良好实践
+- [正反馈 - 对士气很重要]
 ```
 
 ---
 
-## Review Checklist
+## 审查清单
 
-### 1. Null Safety
+### 1. 空值安全
 
-**Check for:**
+**检查：**
 ```java
-// ❌ NPE risk
+// ❌ NPE 风险
 String name = user.getName().toUpperCase();
 
-// ✅ Safe
+// ✅ 安全
 String name = Optional.ofNullable(user.getName())
     .map(String::toUpperCase)
     .orElse("");
 
-// ✅ Also safe (early return)
+// ✅ 也安全（提前返回）
 if (user.getName() == null) {
     return "";
 }
 return user.getName().toUpperCase();
 ```
 
-**Flags:**
-- Chained method calls without null checks
-- Missing `@Nullable` / `@NonNull` annotations on public APIs
-- `Optional.get()` without `isPresent()` check
-- Returning `null` from methods that could return `Optional` or empty collection
+**标记：**
+- 没有空值检查的链式方法调用
+- 公共 API 上缺少 `@Nullable` / `@NonNull` 注解
+- 没有 `isPresent()` 检查的 `Optional.get()`
+- 从可能返回 `Optional` 或空集合的方法返回 `null`
 
-**Suggest:**
-- Use `Optional` for return types that may be absent
-- Use `Objects.requireNonNull()` for constructor/method params
-- Return empty collections instead of null: `Collections.emptyList()`
+**建议：**
+- 对可能缺失的返回类型使用 `Optional`
+- 对构造函数/方法参数使用 `Objects.requireNonNull()`
+- 返回空集合而不是 null：`Collections.emptyList()`
 
-### 2. Exception Handling
+### 2. 异常处理
 
-**Check for:**
+**检查：**
 ```java
-// ❌ Swallowing exceptions
+// ❌ 吞掉异常
 try {
     process();
 } catch (Exception e) {
-    // silently ignored
+    // 静默忽略
 }
 
-// ❌ Catching too broad
+// ❌ 捕获过于宽泛
 catch (Exception e) { }
 catch (Throwable t) { }
 
-// ❌ Losing stack trace
+// ❌ 丢失堆栈跟踪
 catch (IOException e) {
     throw new RuntimeException(e.getMessage());
 }
 
-// ✅ Proper handling
+// ✅ 正确处理
 catch (IOException e) {
     log.error("Failed to process file: {}", filename, e);
     throw new ProcessingException("File processing failed", e);
 }
 ```
 
-**Flags:**
-- Empty catch blocks
-- Catching `Exception` or `Throwable` broadly
-- Losing original exception (not chaining)
-- Using exceptions for flow control
-- Checked exceptions leaking through API boundaries
+**标记：**
+- 空的 catch 块
+- 广泛捕获 `Exception` 或 `Throwable`
+- 丢失原始异常（不链式）
+- 使用异常进行流控制
+- 通过 API 边界泄漏检查异常
 
-**Suggest:**
-- Log with context AND stack trace
-- Use specific exception types
-- Chain exceptions with `cause`
-- Consider custom exceptions for domain errors
+**建议：**
+- 使用上下文和堆栈跟踪记录日志
+- 使用特定的异常类型
+- 使用 `cause` 链式异常
+- 考虑为域错误使用自定义异常
 
-### 3. Collections & Streams
+### 3. 集合与流
 
-**Check for:**
+**检查：**
 ```java
-// ❌ Modifying while iterating
+// ❌ 迭代时修改
 for (Item item : items) {
     if (item.isExpired()) {
         items.remove(item);  // ConcurrentModificationException
     }
 }
 
-// ✅ Use removeIf
+// ✅ 使用 removeIf
 items.removeIf(Item::isExpired);
 
-// ❌ Stream for simple operations
+// ❌ 用于简单操作的 Stream
 list.stream().forEach(System.out::println);
 
-// ✅ Simple loop is cleaner
+// ✅ 简单循环更清晰
 for (Item item : list) {
     System.out.println(item);
 }
 
-// ❌ Collecting to modify
+// ❌ 收集以修改
 List<String> names = users.stream()
     .map(User::getName)
     .collect(Collectors.toList());
-names.add("extra");  // Might be immutable!
+names.add("extra");  // 可能是不可变的！
 
-// ✅ Explicit mutable list
+// ✅ 显式可变列表
 List<String> names = users.stream()
     .map(User::getName)
     .collect(Collectors.toCollection(ArrayList::new));
 ```
 
-**Flags:**
-- Modifying collections during iteration
-- Overusing streams for simple operations
-- Assuming `Collectors.toList()` returns mutable list
-- Not using `List.of()`, `Set.of()`, `Map.of()` for immutable collections
-- Parallel streams without understanding implications
+**标记：**
+- 迭代期间修改集合
+- 过度使用流进行简单操作
+- 假设 `Collectors.toList()` 返回可变列表
+- 不使用 `List.of()`、`Set.of()`、`Map.of()` 作为不可变集合
+- 不理解含义的并行流
 
-**Suggest:**
-- `List.copyOf()` for defensive copies
-- `removeIf()` instead of iterator removal
-- Streams for transformations, loops for side effects
+**建议：**
+- `List.copyOf()` 用于防御性副本
+- `removeIf()` 而不是迭代器删除
+- 流用于转换，循环用于副作用
 
-### 4. Concurrency
+### 4. 并发
 
-**Check for:**
+**检查：**
 ```java
-// ❌ Not thread-safe
+// ❌ 非线程安全
 private Map<String, User> cache = new HashMap<>();
 
-// ✅ Thread-safe
+// ✅ 线程安全
 private Map<String, User> cache = new ConcurrentHashMap<>();
 
-// ❌ Check-then-act race condition
+// ❌ Check-then-act 竞态条件
 if (!map.containsKey(key)) {
     map.put(key, computeValue());
 }
 
-// ✅ Atomic operation
+// ✅ 原子操作
 map.computeIfAbsent(key, k -> computeValue());
 
-// ❌ Double-checked locking (broken without volatile)
+// ❌ 双重检查锁定（没有 volatile 会破坏）
 if (instance == null) {
     synchronized(this) {
         if (instance == null) {
@@ -184,35 +184,35 @@ if (instance == null) {
 }
 ```
 
-**Flags:**
-- Shared mutable state without synchronization
-- Check-then-act patterns without atomicity
-- Missing `volatile` on shared variables
-- Synchronized on non-final objects
-- Thread-unsafe lazy initialization
+**标记：**
+- 没有同步的共享可变状态
+- 没有原子性的 check-then-act 模式
+- 共享变量上缺少 `volatile`
+- 在非 final 对象上同步
+- 非线程安全的延迟初始化
 
-**Suggest:**
-- Prefer immutable objects
-- Use `java.util.concurrent` classes
-- `AtomicReference`, `AtomicInteger` for simple cases
-- Consider `@ThreadSafe` / `@NotThreadSafe` annotations
+**建议：**
+- 优先使用不可变对象
+- 使用 `java.util.concurrent` 类
+- `AtomicReference`、`AtomicInteger` 用于简单情况
+- 考虑 `@ThreadSafe` / `@NotThreadSafe` 注解
 
-### 5. Java Idioms
+### 5. Java 惯用语
 
-**equals/hashCode:**
+**equals/hashCode：**
 ```java
-// ❌ Only equals without hashCode
+// ❌ 只有 equals 没有 hashCode
 @Override
 public boolean equals(Object o) { ... }
-// Missing hashCode!
+// 缺少 hashCode！
 
-// ❌ Mutable fields in hashCode
+// ❌ hashCode 中的可变字段
 @Override
 public int hashCode() {
-    return Objects.hash(id, mutableField);  // Breaks HashMap
+    return Objects.hash(id, mutableField);  // 破坏 HashMap
 }
 
-// ✅ Use immutable fields, implement both
+// ✅ 使用不可变字段，同时实现两者
 @Override
 public boolean equals(Object o) {
     if (this == o) return true;
@@ -226,112 +226,112 @@ public int hashCode() {
 }
 ```
 
-**toString:**
+**toString：**
 ```java
-// ❌ Missing - hard to debug
-// No toString()
+// ❌ 缺少 - 难以调试
+// 没有 toString()
 
-// ❌ Including sensitive data
+// ❌ 包含敏感数据
 return "User{password='" + password + "'}";
 
-// ✅ Useful for debugging
+// ✅ 对调试有用
 @Override
 public String toString() {
     return "User{id=" + id + ", name='" + name + "'}";
 }
 ```
 
-**Builders:**
+**Builders：**
 ```java
-// ✅ For classes with many optional parameters
+// ✅ 对于带有多个可选参数的类
 User user = User.builder()
     .name("John")
     .email("john@example.com")
     .build();
 ```
 
-**Flags:**
-- `equals` without `hashCode`
-- Mutable fields in `hashCode`
-- Missing `toString` on domain objects
-- Constructors with > 3-4 parameters (suggest builder)
-- Not using `instanceof` pattern matching (Java 16+)
+**标记：**
+- `equals` 没有 `hashCode`
+- `hashCode` 中的可变字段
+- 域对象上缺少 `toString`
+- 带有 > 3-4 个参数的构造函数（建议使用 builder）
+- 不使用 `instanceof` 模式匹配（Java 16+）
 
-### 6. Resource Management
+### 6. 资源管理
 
-**Check for:**
+**检查：**
 ```java
-// ❌ Resource leak
+// ❌ 资源泄漏
 FileInputStream fis = new FileInputStream(file);
-// ... might throw before close
+// ... 可能在关闭之前抛出
 
 // ✅ Try-with-resources
 try (FileInputStream fis = new FileInputStream(file)) {
     // ...
 }
 
-// ❌ Multiple resources, wrong order
+// ❌ 多个资源，错误顺序
 try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-    // FileWriter might not be closed if BufferedWriter fails
+    // 如果 BufferedWriter 失败，FileWriter 可能不会关闭
 }
 
-// ✅ Separate declarations
+// ✅ 分离声明
 try (FileWriter fw = new FileWriter(file);
      BufferedWriter writer = new BufferedWriter(fw)) {
-    // Both properly closed
+    // 两者都正确关闭
 }
 ```
 
-**Flags:**
-- Not using try-with-resources for `Closeable`/`AutoCloseable`
-- Resources opened but not in try-with-resources
-- Database connections/statements not properly closed
+**标记：**
+- 不对 `Closeable`/`AutoCloseable` 使用 try-with-resources
+- 打开了资源但不在 try-with-resources 中
+- 数据库连接/语句未正确关闭
 
-### 7. API Design
+### 7. API 设计
 
-**Check for:**
+**检查：**
 ```java
-// ❌ Boolean parameters
-process(data, true, false);  // What do these mean?
+// ❌ Boolean 参数
+process(data, true, false);  // 这些是什么意思？
 
-// ✅ Use enums or builder
+// ✅ 使用枚举或 builder
 process(data, ProcessMode.ASYNC, ErrorHandling.STRICT);
 
-// ❌ Returning null for "not found"
+// ❌ 为"未找到"返回 null
 public User findById(Long id) {
-    return users.get(id);  // null if not found
+    return users.get(id);  // 如果未找到则为 null
 }
 
-// ✅ Return Optional
+// ✅ 返回 Optional
 public Optional<User> findById(Long id) {
     return Optional.ofNullable(users.get(id));
 }
 
-// ❌ Accepting null collections
+// ❌ 接受 null 集合
 public void process(List<Item> items) {
     if (items == null) items = Collections.emptyList();
 }
 
-// ✅ Require non-null, accept empty
+// ✅ 要求非 null，接受空
 public void process(List<Item> items) {
     Objects.requireNonNull(items, "items must not be null");
 }
 ```
 
-**Flags:**
-- Boolean parameters (prefer enums)
-- Methods with > 3 parameters (consider parameter object)
-- Inconsistent null handling across similar methods
-- Missing validation on public API inputs
+**标记：**
+- Boolean 参数（首选枚举）
+- 带有 > 3 个参数的方法（考虑参数对象）
+- 类似方法之间的不一致 null 处理
+- 公共 API 输入上缺少验证
 
-### 8. Performance Considerations
+### 8. 性能考虑
 
-**Check for:**
+**检查：**
 ```java
-// ❌ String concatenation in loop
+// ❌ 循环中的字符串拼接
 String result = "";
 for (String s : strings) {
-    result += s;  // Creates new String each iteration
+    result += s;  // 每次迭代创建新的 String
 }
 
 // ✅ StringBuilder
@@ -340,69 +340,69 @@ for (String s : strings) {
     sb.append(s);
 }
 
-// ❌ Regex compilation in loop
+// ❌ 循环中的正则编译
 for (String line : lines) {
-    if (line.matches("pattern.*")) { }  // Compiles regex each time
+    if (line.matches("pattern.*")) { }  // 每次编译正则
 }
 
-// ✅ Pre-compiled pattern
+// ✅ 预编译模式
 private static final Pattern PATTERN = Pattern.compile("pattern.*");
 for (String line : lines) {
     if (PATTERN.matcher(line).matches()) { }
 }
 
-// ❌ N+1 in loops
+// ❌ 循环中的 N+1
 for (User user : users) {
     List<Order> orders = orderRepo.findByUserId(user.getId());
 }
 
-// ✅ Batch fetch
+// ✅ 批量获取
 Map<Long, List<Order>> ordersByUser = orderRepo.findByUserIds(userIds);
 ```
 
-**Flags:**
-- String concatenation in loops
-- Regex compilation in loops
-- N+1 query patterns
-- Creating objects in tight loops that could be reused
-- Not using primitive streams (`IntStream`, `LongStream`)
+**标记：**
+- 循环中的字符串拼接
+- 循环中的正则编译
+- N+1 查询模式
+- 在紧凑循环中创建可以重用的对象
+- 不使用原始流（`IntStream`、`LongStream`）
 
-### 9. Testing Hints
+### 9. 测试提示
 
-**Suggest tests for:**
-- Null inputs
-- Empty collections
-- Boundary values
-- Exception cases
-- Concurrent access (if applicable)
+**建议测试：**
+- Null 输入
+- 空集合
+- 边界值
+- 异常情况
+- 并发访问（如适用）
 
 ---
 
-## Severity Guidelines
+## 严重性指南
 
-| Severity | Criteria |
+| 严重性 | 标准 |
 |----------|----------|
-| **Critical** | Security vulnerability, data loss risk, production crash |
-| **High** | Bug likely, significant performance issue, breaks API contract |
-| **Medium** | Code smell, maintainability issue, missing best practice |
-| **Low** | Style, minor optimization, suggestion |
+| **严重** | 安全漏洞、数据丢失风险、生产崩溃 |
+| **高** | 可能的 Bug、重大性能问题、破坏 API 合约 |
+| **中等** | 代码异味、可维护性问题、缺少最佳实践 |
+| **低** | 风格、次要优化、建议 |
 
-## Token Optimization
+## Token 优化
 
-- Focus on changed lines (use `git diff`)
-- Don't repeat obvious issues - group similar findings
-- Reference line numbers, not full code quotes
-- Skip files that are auto-generated or test fixtures
+- 专注于更改的行（使用 `git diff`）
+- 不要重复明显的问题 - 分组类似的发现
+- 引用行号，而不是完整的代码引用
+- 跳过自动生成或测试夹具的文件
 
-## Quick Reference Card
+## 快速参考卡
 
-| Category | Key Checks |
+| 类别 | 关键检查 |
 |----------|------------|
-| Null Safety | Chained calls, Optional misuse, null returns |
-| Exceptions | Empty catch, broad catch, lost stack trace |
-| Collections | Modification during iteration, stream vs loop |
-| Concurrency | Shared mutable state, check-then-act |
-| Idioms | equals/hashCode pair, toString, builders |
-| Resources | try-with-resources, connection leaks |
-| API | Boolean params, null handling, validation |
-| Performance | String concat, regex in loop, N+1 |
+| 空值安全 | 链式调用、Optional 误用、null 返回 |
+| 异常 | 空 catch、广泛 catch、丢失堆栈跟踪 |
+| 集合 | 迭代期间修改、stream vs loop |
+| 并发 | 共享可变状态、check-then-act |
+| 惯用语 | equals/hashCode 对、toString、builders |
+| 资源 | try-with-resources、连接泄漏 |
+| API | Boolean 参数、null 处理、验证 |
+| 性能 | 字符串拼接、循环中的正则、N+1 |

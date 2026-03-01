@@ -4,13 +4,13 @@
 
 ---
 
-## Description
+## 描述
 
-Best practices and patterns for Spring Boot applications. Covers project structure, layered architecture, DTOs, exception handling, configuration, and testing.
+Spring Boot 应用程序的最佳实践和模式。涵盖项目结构、分层架构、DTO、异常处理、配置和测试。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Create a REST controller for products"
 - "Add service layer for user management"
@@ -19,7 +19,7 @@ Best practices and patterns for Spring Boot applications. Covers project structu
 
 ---
 
-## Examples
+## 示例
 
 ```
 > view .claude/skills/spring-boot-patterns/SKILL.md
@@ -29,23 +29,23 @@ Best practices and patterns for Spring Boot applications. Covers project structu
 
 ---
 
-## Patterns Covered
+## 涵盖的模式
 
 | Layer | Topics |
 |-------|--------|
-| Controller | REST conventions, validation, status codes |
-| Service | Interface + Impl, transactions, mappers |
-| Repository | JPA queries, derived methods, optimization |
-| DTO | Request/Response records, MapStruct |
-| Exception | Custom exceptions, global handler |
-| Config | Properties, profiles, validation |
-| Testing | MockMvc, Mockito, Testcontainers |
+| Controller | REST 约定、验证、状态码 |
+| Service | Interface + Impl、事务、mappers |
+| Repository | JPA 查询、派生方法、优化 |
+| DTO | Request/Response records、MapStruct |
+| Exception | 自定义异常、全局处理器 |
+| Config | Properties、profiles、验证 |
+| Testing | MockMvc、Mockito、Testcontainers |
 
 ---
 
-## Notes / Tips
+## 注意事项 / 提示
 
-- Use constructor injection (Lombok `@RequiredArgsConstructor`)
-- Default `@Transactional(readOnly = true)` at service class level
-- Never expose entities directly - use DTOs
-- Prefer records for DTOs (Java 17+)
+- 使用构造器注入（Lombok `@RequiredArgsConstructor`）
+- 默认在 service 类级别使用 `@Transactional(readOnly = true)`
+- 永远不要直接暴露 entity - 使用 DTO
+- DTO 优先使用 records（Java 17+）

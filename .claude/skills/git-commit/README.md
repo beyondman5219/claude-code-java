@@ -1,33 +1,33 @@
-# Git Commit Messages
+# Git Commit 消息
 
-**Load**: `view .claude/skills/git-commit/SKILL.md`
-
----
-
-## Description
-
-Helps Claude write clear, concise, and conventional Git commit messages for Java projects.
+**加载**：`view .claude/skills/git-commit/SKILL.md`
 
 ---
 
-## Use Cases
+## 描述
 
-- "Commit staged changes"
-- "Create commit for bug fix #123"
-- "Generate conventional commit message"
+帮助 Claude 为 Java 项目编写清晰、简洁且符合规范的 Git commit 消息。
 
 ---
 
-## Examples
+## 使用场景
+
+- "提交暂存的更改"
+- "为 bug 修复 #123 创建 commit"
+- "生成 conventional commit 消息"
+
+---
+
+## 示例
 
 ```
 > view .claude/skills/git-commit/SKILL.md
-> "Commit these changes"
-→ fix(plugin-loader): prevent NPE when directory missing
+> "提交这些更改"
+→ fix(plugin-loader): 防止目录缺失时的 NPE
 ```
 
 ---
 
-## Notes / Tips
+## 注意事项 / 提示
 
-- Best used after staging changes in a Java project
+- 最好在 Java 项目中暂存更改后使用

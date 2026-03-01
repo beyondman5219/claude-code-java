@@ -4,13 +4,13 @@
 
 ---
 
-## Description
+## 描述
 
-Audit Maven dependencies for outdated versions, security vulnerabilities, and conflicts. Uses standard Maven plugins - no additional tooling required.
+审计 Maven 依赖的过时版本、安全漏洞和冲突。使用标准 Maven 插件 - 不需要额外的工具。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Check for outdated dependencies"
 - "Audit dependencies before release"
@@ -19,7 +19,7 @@ Audit Maven dependencies for outdated versions, security vulnerabilities, and co
 
 ---
 
-## Examples
+## 示例
 
 ```
 > view .claude/skills/maven-dependency-audit/SKILL.md
@@ -29,20 +29,20 @@ Audit Maven dependencies for outdated versions, security vulnerabilities, and co
 
 ---
 
-## Tools Used
+## 使用的工具
 
 | Tool | Purpose |
 |------|---------|
-| `mvn versions:display-dependency-updates` | Find outdated dependencies |
-| `mvn dependency:tree` | Analyze dependency graph |
-| `mvn dependency:analyze` | Find unused dependencies |
-| `mvn dependency-check:check` | Security vulnerability scan (OWASP) |
+| `mvn versions:display-dependency-updates` | 查找过时的依赖 |
+| `mvn dependency:tree` | 分析依赖树 |
+| `mvn dependency:analyze` | 查找未使用的依赖 |
+| `mvn dependency-check:check` | 安全漏洞扫描（OWASP） |
 
 ---
 
-## Notes / Tips
+## 注意事项 / 提示
 
-- Run monthly or before each release
-- Patch updates are usually safe; major updates need review
-- Use `-Dincludes=groupId` to filter large dependency trees
-- Consider enabling GitHub Dependabot for automated alerts
+- 每月或每次发布前运行
+- Patch 更新通常是安全的；主要更新需要审查
+- 使用 `-Dincludes=groupId` 过滤大型依赖树
+- 考虑启用 GitHub Dependabot 以进行自动警报

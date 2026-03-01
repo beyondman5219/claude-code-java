@@ -1,77 +1,77 @@
 # Performance Smell Detection Skill
 
-> Identify potential code-level performance issues - with nuance, not absolutes
+> 识别潜在的代码级性能问题 - 带有细微差别，而非绝对标准
 
-## What It Does
+## 功能描述
 
-Helps notice **potential** performance smells in Java code:
-- Stream API usage patterns
-- Boxing/unboxing overhead
-- Regex compilation costs
-- Collection inefficiencies
-- String operations
+帮助发现 Java 代码中的**潜在**性能异味：
+- Stream API 使用模式
+- 装箱/拆箱开销
+- Regex 编译成本
+- 集合低效
+- 字符串操作
 
-**Philosophy**: "Measure first, optimize second" - modern JVMs are highly optimized.
+**理念**："先测量，后优化" - 现代 JVM 已经高度优化。
 
-## When to Use
+## 何时使用
 
 - "Check for performance issues"
 - "Review this hot path"
 - "Is this code efficient?"
-- Investigating measured slowness
+- 调查测量到的缓慢
 
-## Java Version Awareness
+## Java 版本意识
 
-This skill accounts for modern Java optimizations:
+此技能考虑了现代 Java 优化：
 
-| Topic | Java 9+ Change |
+| Topic | Java 9+ 变化 |
 |-------|----------------|
-| String `+` | Uses invokedynamic, well optimized outside loops |
-| StringBuilder | Still best for loops |
-| Virtual Threads | Java 21+ for I/O-bound work |
-| String hashCode | Java 25 constant folding |
+| String `+` | 使用 invokedynamic，循环外已优化良好 |
+| StringBuilder | 循环中仍然最好 |
+| Virtual Threads | Java 21+ 用于 I/O 密集型工作 |
+| String hashCode | Java 25 常量折叠 |
 
-## Severity Levels
+## 严重性级别
 
-| Level | Meaning | Action |
+| Level | 含义 | 操作 |
 |-------|---------|--------|
-| 🔴 High | Usually worth fixing | Fix proactively |
-| 🟡 Medium | Measure first | Profile before changing |
-| 🟢 Low | Nice to have | Only if critical path |
+| 🔴 High | 通常值得修复 | 主动修复 |
+| 🟡 Medium | 先测量 | 更改前进行分析 |
+| 🟢 Low | 最好有 | 仅在关键路径上 |
 
-## What It Checks
+## 检查内容
 
-1. **Strings** - Concatenation in loops (still valid concern)
-2. **Streams** - Overhead in tight loops, parallel misuse
-3. **Boxing** - Primitive wrappers in hot paths
-4. **Regex** - Pattern.compile in loops
-5. **Collections** - Wrong type, unbounded queries
-6. **Modern patterns** - Virtual threads, structured concurrency
+1. **Strings** - 循环中的拼接（仍然是合理关注点）
+2. **Streams** - 紧密循环中的开销、并行误用
+3. **Boxing** - 热路径中的基本类型包装器
+4. **Regex** - 循环中的 Pattern.compile
+5. **Collections** - 错误类型、无界查询
+6. **Modern patterns** - Virtual threads、structured concurrency
 
-## What It Does NOT Check
+## 不检查的内容
 
-- **JPA/Database** - Use `jpa-patterns` skill
-- **Architecture** - Use `architecture-review` skill
-- **JVM tuning** - Out of scope (GC, heap, etc.)
+- **JPA/Database** - 使用 `jpa-patterns` skill
+- **Architecture** - 使用 `architecture-review` skill
+- **JVM tuning** - 超出范围（GC、heap 等）
 
-## Example Usage
+## 使用示例
 
 ```
 You: Check this code for performance issues
 
-Claude: [Identifies potential smells]
-        [Rates severity: 🔴/🟡/🟢]
-        [Recommends measuring before changing]
-        [Suggests modern alternatives if applicable]
+Claude: [识别潜在异味]
+        [评估严重性：🔴/🟡/🟢]
+        [建议更改前先测量]
+        [如适用，建议现代替代方案]
 ```
 
-## Related Skills
+## 相关技能
 
-- `jpa-patterns` - Database performance (N+1, pagination)
-- `java-code-review` - General code quality
-- `concurrency-review` - Thread safety and async patterns
+- `jpa-patterns` - 数据库性能（N+1、分页）
+- `java-code-review` - 通用代码质量
+- `concurrency-review` - 线程安全和异步模式
 
-## References
+## 参考资料
 
 - [Inside.java - JDK 25 Performance](https://inside.java/2025/10/20/jdk-25-performance-improvements/)
 - [Java 25 Features - InfoQ](https://www.infoq.com/news/2025/09/java25-released/)

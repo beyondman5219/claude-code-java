@@ -4,13 +4,13 @@
 
 ---
 
-## Description
+## 描述
 
-JPA/Hibernate patterns and common pitfalls for Spring applications. Covers N+1 problem, lazy loading, transactions, entity relationships, and query optimization.
+Spring 应用程序的 JPA/Hibernate 模式和常见陷阱。涵盖 N+1 问题、lazy loading、事务、entity 关系和查询优化。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Too many SQL queries executing"
 - "LazyInitializationException error"
@@ -21,7 +21,7 @@ JPA/Hibernate patterns and common pitfalls for Spring applications. Covers N+1 p
 
 ---
 
-## Examples
+## 示例
 
 ```
 > view .claude/skills/jpa-patterns/SKILL.md
@@ -31,38 +31,38 @@ JPA/Hibernate patterns and common pitfalls for Spring applications. Covers N+1 p
 
 ---
 
-## Topics Covered
+## 涵盖主题
 
-| Topic | Key Points |
+| Topic | 关键点 |
 |-------|------------|
-| **N+1 Problem** | JOIN FETCH, @EntityGraph, @BatchSize |
-| **Lazy Loading** | FetchType.LAZY, LazyInitializationException solutions |
-| **Transactions** | @Transactional, propagation, read-only |
-| **Relationships** | OneToMany, ManyToMany, bidirectional sync |
-| **Optimization** | Pagination, DTO projections, bulk operations |
-| **Locking** | @Version, OptimisticLockException |
+| **N+1 Problem** | JOIN FETCH、@EntityGraph、@BatchSize |
+| **Lazy Loading** | FetchType.LAZY、LazyInitializationException 解决方案 |
+| **Transactions** | @Transactional、传播、只读 |
+| **Relationships** | OneToMany、ManyToMany、双向同步 |
+| **Optimization** | 分页、DTO 投影、批量操作 |
+| **Locking** | @Version、OptimisticLockException |
 
 ---
 
-## Common Mistakes Addressed
+## 常见错误处理
 
-- CascadeType.ALL on @ManyToOne
-- Missing database indexes
-- toString() triggering lazy loads
-- Calling @Transactional from same class
-
----
-
-## Related Skills
-
-- `spring-boot-patterns` - Spring Boot patterns
-- `java-code-review` - Code review checklist
+- @ManyToOne 上的 CascadeType.ALL
+- 缺少数据库索引
+- toString() 触发 lazy loading
+- 从同一类调用 @Transactional
 
 ---
 
-## Resources
+## 相关技能
+
+- `spring-boot-patterns` - Spring Boot 模式
+- `java-code-review` - 代码审查清单
+
+---
+
+## 参考资料
 
 - [Hibernate ORM Documentation](https://hibernate.org/orm/documentation/)
 - [Spring Data JPA Reference](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
-- [Vlad Mihalcea's Blog](https://vladmihalcea.com/) - JPA/Hibernate deep dives
+- [Vlad Mihalcea's Blog](https://vladmihalcea.com/) - JPA/Hibernate 深入分析
 - [High-Performance Java Persistence](https://vladmihalcea.com/books/high-performance-java-persistence/)

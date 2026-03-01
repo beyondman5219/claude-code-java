@@ -4,13 +4,13 @@
 
 ---
 
-## Description
+## 描述
 
-Java security checklist based on OWASP Top 10 and secure coding practices. Framework-agnostic core with specific sections for Spring, Quarkus, and Jakarta EE.
+基于 OWASP Top 10 和安全编码实践的 Java 安全清单。框架无关的核心，包含 Spring、Quarkus 和 Jakarta EE 的特定部分。
 
 ---
 
-## Use Cases
+## 使用场景
 
 - "Review this code for security issues"
 - "Check for SQL injection vulnerabilities"
@@ -20,25 +20,25 @@ Java security checklist based on OWASP Top 10 and secure coding practices. Frame
 
 ---
 
-## Topics Covered
+## 涵盖主题
 
-| Topic | Applies To |
+| Topic | 适用于 |
 |-------|------------|
-| **Input Validation** | All Java (Bean Validation JSR 380) |
-| **SQL Injection** | JPA, Hibernate, JDBC |
-| **XSS Prevention** | Web applications |
-| **CSRF Protection** | Spring, Quarkus |
-| **Authentication** | All frameworks |
-| **Secrets Management** | All applications |
-| **Secure Deserialization** | All Java |
-| **Dependency Security** | Maven, Gradle |
-| **Security Headers** | Web applications |
+| **Input Validation** | 所有 Java（Bean Validation JSR 380） |
+| **SQL Injection** | JPA、Hibernate、JDBC |
+| **XSS Prevention** | Web 应用程序 |
+| **CSRF Protection** | Spring、Quarkus |
+| **Authentication** | 所有框架 |
+| **Secrets Management** | 所有应用程序 |
+| **Secure Deserialization** | 所有 Java |
+| **Dependency Security** | Maven、Gradle |
+| **Security Headers** | Web 应用程序 |
 
 ---
 
-## OWASP Top 10 Coverage
+## OWASP Top 10 覆盖
 
-| Risk | Covered |
+| Risk | 已覆盖 |
 |------|---------|
 | A01 Broken Access Control | ✅ |
 | A02 Cryptographic Failures | ✅ |
@@ -53,15 +53,15 @@ Java security checklist based on OWASP Top 10 and secure coding practices. Frame
 
 ---
 
-## Related Skills
+## 相关技能
 
-- `java-code-review` - General review
-- `maven-dependency-audit` - Dependency scanning
-- `logging-patterns` - Secure logging
+- `java-code-review` - 通用审查
+- `maven-dependency-audit` - 依赖扫描
+- `logging-patterns` - 安全日志
 
 ---
 
-## Resources
+## 参考资料
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [OWASP Java Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Java_Security_Cheat_Sheet.html)
