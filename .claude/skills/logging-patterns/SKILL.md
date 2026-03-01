@@ -1,60 +1,60 @@
 ---
 name: logging-patterns
-description: Java 日志最佳实践，使用 SLF4J、结构化日志（JSON）和 MDC 进行请求追踪。包含为 Claude Code 分析优化的 AI 友好日志格式 with SLF4J, structured logging (JSON), and MDC for request tracing. Includes AI-friendly log formats for Claude Code debugging. Use when user asks about logging, debugging application flow, or analyzing logs.
+description: Java 日志最佳实践，使用 SLF4J、结构化日志（JSON）和 MDC 进行请求追踪。包含为 Claude Code 分析优化的 AI 友好日志格式。当用户询问日志、调试应用程序流程或分析日志时使用。
 ---
 
-# Logging Patterns Skill
+# Logging Patterns 技能
 
-Effective logging for Java applications with focus on structured, AI-parsable formats.
+有效的 Java 应用程序日志，专注于结构化、AI 可解析的格式。
 
-## When to Use
-- User says "add logging" / "improve logs" / "debug this"
-- Analyzing application flow from logs
-- Setting up structured logging (JSON)
-- Request tracing with correlation IDs
-- AI/Claude Code needs to analyze application behavior
+## 何时使用
+- 用户说 "add logging" / "improve logs" / "debug this"
+- 从日志分析应用程序流程
+- 设置结构化日志（JSON）
+- 使用 correlation IDs 进行请求追踪
+- AI/Claude Code 需要分析应用程序行为
 
 ---
 
-## AI-Friendly Logging
+## AI 友好日志
 
-> **Key insight:** JSON logs are better for AI analysis - faster parsing, fewer tokens, direct field access.
+> **关键洞察**：JSON 日志更适合 AI 分析 - 更快的解析、更少的 token、直接的字段访问。
 
-### Why JSON for AI/Claude Code?
+### 为什么 AI/Claude Code 使用 JSON？
 
 ```
-# Text format - AI must "interpret" the string
+# Text format - AI 必须"解释"字符串
 2026-01-29 10:15:30 INFO OrderService - Order 12345 created for user-789, total: 99.99
 
-# JSON format - AI extracts fields directly
+# JSON format - AI 直接提取字段
 {"timestamp":"2026-01-29T10:15:30Z","level":"INFO","orderId":12345,"userId":"user-789","total":99.99}
 ```
 
 | Aspect | Text | JSON |
 |--------|------|------|
-| Parsing | Regex/interpretation | Direct field access |
-| Token usage | Higher (repeated patterns) | Lower (structured) |
-| Error extraction | Parse stack trace text | `exception` field |
-| Filtering | grep patterns | `jq` queries |
+| 解析 | Regex/解释 | 直接字段访问 |
+| Token 使用 | 更高（重复模式） | 更低（结构化） |
+| 错误提取 | 解析堆栈跟踪文本 | `exception` 字段 |
+| 过滤 | grep patterns | `jq` queries |
 
-### Recommended Setup for AI-Assisted Development
+### AI 辅助开发的推荐设置
 
 ```yaml
-# application.yml - JSON by default
+# application.yml - 默认 JSON
 logging:
   structured:
     format:
       console: logstash  # Spring Boot 3.4+
 
-# When YOU need to read logs manually:
-# Option 1: Use jq
+# 当你需要手动读取日志时：
+# 选项 1：使用 jq
 # tail -f app.log | jq .
 
-# Option 2: Switch profile temporarily
+# 选项 2：临时切换 profile
 # java -jar app.jar --spring.profiles.active=human-logs
 ```
 
-### Log Format Optimized for AI Analysis
+### 为 AI 分析优化的日志格式
 
 ```json
 {
@@ -71,55 +71,55 @@ logging:
 }
 ```
 
-**Key fields for AI debugging:**
-- `requestId` - group all logs from same request
-- `step` - track progress through flow
-- `duration_ms` - identify slow operations
-- `level` - quick filter for errors
+**AI 调试的关键字段：**
+- `requestId` - 将同一请求的所有日志分组
+- `step` - 跟踪流程中的进度
+- `duration_ms` - 识别慢操作
+- `level` - 快速过滤错误
 
-### Reading Logs with AI/Claude Code
+### 使用 AI/Claude Code 读取日志
 
-When asking AI to analyze logs:
+当要求 AI 分析日志时：
 
 ```bash
-# Get recent errors
+# 获取最近的错误
 cat app.log | jq 'select(.level == "ERROR")' | tail -20
 
-# Follow specific request
+# 跟踪特定请求
 cat app.log | jq 'select(.requestId == "req-abc123")'
 
-# Find slow operations
+# 查找慢操作
 cat app.log | jq 'select(.duration_ms > 1000)'
 ```
 
-AI can then:
-1. Parse JSON directly (no guessing)
-2. Follow request flow via requestId
-3. Identify exactly where errors occurred
-4. Measure timing between steps
+AI 可以：
+1. 直接解析 JSON（无需猜测）
+2. 通过 requestId 跟踪请求流程
+3. 精确识别错误发生位置
+4. 测量步骤之间的时间
 
 ---
 
-## Quick Setup (Spring Boot 3.4+)
+## 快速设置（Spring Boot 3.4+）
 
-### Native Structured Logging
+### 原生结构化日志
 
-Spring Boot 3.4+ has built-in support - no extra dependencies!
+Spring Boot 3.4+ 具有内置支持 - 无需额外依赖！
 
 ```yaml
 # application.yml
 logging:
   structured:
     format:
-      console: logstash    # or "ecs" for Elastic Common Schema
+      console: logstash    # 或 "ecs" 用于 Elastic Common Schema
 
-# Supported formats: logstash, ecs, gelf
+# 支持的格式：logstash、ecs、gelf
 ```
 
-### Profile-Based Switching
+### 基于 Profile 的切换
 
 ```yaml
-# application.yml (default - JSON for AI/prod)
+# application.yml（默认 - JSON 用于 AI/prod）
 spring:
   profiles:
     default: json-logs
@@ -139,24 +139,24 @@ spring:
   config:
     activate:
       on-profile: human-logs
-# No structured format = human-readable default
+# 无结构化格式 = 人类可读的默认格式
 logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
 ```
 
-**Usage:**
+**使用：**
 ```bash
-# Default: JSON (for AI, CI/CD, production)
+# 默认：JSON（用于 AI、CI/CD、生产）
 ./mvnw spring-boot:run
 
-# Human-readable when needed
+# 需要时可读
 ./mvnw spring-boot:run -Dspring.profiles.active=human-logs
 ```
 
 ---
 
-## Setup for Spring Boot < 3.4
+## Spring Boot < 3.4 的设置
 
 ### Logstash Logback Encoder
 
@@ -174,7 +174,7 @@ logging:
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- JSON (default) -->
+    <!-- JSON（默认） -->
     <springProfile name="!human-logs">
         <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
@@ -187,7 +187,7 @@ logging:
         </root>
     </springProfile>
 
-    <!-- Human-readable (optional) -->
+    <!-- 人类可读（可选） -->
     <springProfile name="human-logs">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
@@ -202,12 +202,12 @@ logging:
 </configuration>
 ```
 
-### Adding Custom Fields (Logstash Encoder)
+### 添加自定义字段（Logstash Encoder）
 
 ```java
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
-// Fields appear as separate JSON keys
+// 字段显示为单独的 JSON 键
 log.info("Order created",
     kv("orderId", order.getId()),
     kv("userId", user.getId()),
@@ -215,15 +215,15 @@ log.info("Order created",
     kv("step", "order_created")
 );
 
-// Output:
+// 输出：
 // {"message":"Order created","orderId":123,"userId":"u-456","total":99.99,"step":"order_created"}
 ```
 
 ---
 
-## SLF4J Basics
+## SLF4J 基础
 
-### Logger Declaration
+### Logger 声明
 
 ```java
 import org.slf4j.Logger;
@@ -234,24 +234,24 @@ public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 }
 
-// Or with Lombok
+// 或使用 Lombok
 @Slf4j
 @Service
 public class OrderService {
-    // use `log` directly
+    // 直接使用 `log`
 }
 ```
 
-### Parameterized Logging
+### 参数化日志
 
 ```java
-// ✅ GOOD: Evaluated only if level enabled
+// ✅ 好：仅在启用级别时评估
 log.debug("Processing order {} for user {}", orderId, userId);
 
-// ❌ BAD: Always concatenates
+// ❌ 坏：总是拼接
 log.debug("Processing order " + orderId + " for user " + userId);
 
-// ✅ For expensive operations
+// ✅ 对于昂贵的操作
 if (log.isDebugEnabled()) {
     log.debug("Full order details: {}", order.toJson());
 }
@@ -259,15 +259,15 @@ if (log.isDebugEnabled()) {
 
 ---
 
-## Log Levels
+## 日志级别
 
-| Level | When | Example |
+| Level | 何时 | 示例 |
 |-------|------|---------|
-| **ERROR** | Failures needing attention | Unhandled exception, service down |
-| **WARN** | Unexpected but handled | Retry succeeded, deprecated API used |
-| **INFO** | Business events | Order created, payment processed |
-| **DEBUG** | Technical details | Method params, SQL queries |
-| **TRACE** | Very detailed | Loop iterations (rarely used) |
+| **ERROR** | 需要注意的失败 | 未处理的异常、服务关闭 |
+| **WARN** | 意外但已处理 | 重试成功、使用了已弃用的 API |
+| **INFO** | 业务事件 | 订单创建、支付处理 |
+| **DEBUG** | 技术细节 | 方法参数、SQL 查询 |
+| **TRACE** | 非常详细 | 循环迭代（很少使用） |
 
 ```java
 log.error("Payment failed", kv("orderId", id), kv("reason", reason), exception);
@@ -280,7 +280,7 @@ log.debug("Fetching from DB", kv("query", "findById"), kv("id", id));
 
 ## MDC (Mapped Diagnostic Context)
 
-MDC adds context to every log entry in a request - essential for tracing.
+MDC 为请求中的每个日志条目添加上下文 - 对追踪至关重要。
 
 ### Request ID Filter
 
@@ -309,28 +309,28 @@ public class RequestContextFilter extends OncePerRequestFilter {
 }
 ```
 
-### Add User Context
+### 添加用户上下文
 
 ```java
-// After authentication
+// 认证后
 MDC.put("userId", authentication.getName());
 
-// All subsequent logs include userId automatically
+// 所有后续日志自动包含 userId
 log.info("User action performed");  // {"userId":"john123","message":"User action performed"}
 ```
 
-### MDC in Async Operations
+### 异步操作中的 MDC
 
 ```java
-// MDC doesn't auto-propagate to new threads!
+// MDC 不会自动传播到新线程！
 
-// ✅ Copy MDC context
+// ✅ 复制 MDC 上下文
 Map<String, String> context = MDC.getCopyOfContextMap();
 
 CompletableFuture.runAsync(() -> {
     try {
         if (context != null) MDC.setContextMap(context);
-        log.info("Async task running");  // Has requestId, userId
+        log.info("Async task running");  // 有 requestId、userId
     } finally {
         MDC.clear();
     }
@@ -339,12 +339,12 @@ CompletableFuture.runAsync(() -> {
 
 ---
 
-## What to Log
+## 记录什么
 
-### Business Events (INFO)
+### 业务事件（INFO）
 
 ```java
-// Include key identifiers and state
+// 包含关键标识符和状态
 log.info("Order created",
     kv("orderId", id),
     kv("userId", userId),
@@ -359,7 +359,7 @@ log.info("Payment processed",
     kv("step", "payment_completed"));
 ```
 
-### External Calls (with timing)
+### 外部调用（带计时）
 
 ```java
 long start = System.currentTimeMillis();
@@ -380,7 +380,7 @@ try {
 }
 ```
 
-### Flow Steps (for AI tracing)
+### 流程步骤（用于 AI 追踪）
 
 ```java
 public Order processOrder(CreateOrderRequest request) {
@@ -402,16 +402,16 @@ public Order processOrder(CreateOrderRequest request) {
 
 ---
 
-## What NOT to Log
+## 不记录什么
 
 ```java
-// ❌ NEVER log sensitive data
-log.info("Login", kv("password", password));           // Passwords
-log.info("Payment", kv("cardNumber", card));           // Full card numbers
+// ❌ 永远不要记录敏感数据
+log.info("Login", kv("password", password));           // 密码
+log.info("Payment", kv("cardNumber", card));           // 完整卡号
 log.info("Request", kv("token", jwtToken));            // Tokens
 log.info("User", kv("ssn", socialSecurity));           // PII
 
-// ✅ Safe alternatives
+// ✅ 安全的替代方案
 log.info("Login attempted", kv("userId", userId));
 log.info("Payment", kv("cardLast4", last4));
 log.info("Token validated", kv("subject", sub), kv("exp", expiry));
@@ -419,22 +419,22 @@ log.info("Token validated", kv("subject", sub), kv("exp", expiry));
 
 ---
 
-## Exception Logging
+## 异常日志
 
-### Log Once at Boundary
+### 在边界记录一次
 
 ```java
-// ❌ BAD: Logs same exception multiple times
+// ❌ 坏：多次记录同一异常
 void methodA() {
     try { methodB(); }
-    catch (Exception e) { log.error("Error", e); throw e; }  // Log #1
+    catch (Exception e) { log.error("Error", e); throw e; }  // 日志 #1
 }
 void methodB() {
     try { methodC(); }
-    catch (Exception e) { log.error("Error", e); throw e; }  // Log #2
+    catch (Exception e) { log.error("Error", e); throw e; }  // 日志 #2
 }
 
-// ✅ GOOD: Log at service boundary only
+// ✅ 好：仅在 service 边界记录
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -444,19 +444,19 @@ public class GlobalExceptionHandler {
             kv("path", request.getRequestURI()),
             kv("method", request.getMethod()),
             kv("errorType", e.getClass().getSimpleName()),
-            e);  // Full stack trace
+            e);  // 完整堆栈跟踪
         return ResponseEntity.status(500).body(errorResponse);
     }
 }
 ```
 
-### Include Context
+### 包含上下文
 
 ```java
-// ❌ Useless
+// ❌ 无用
 log.error("Error occurred", e);
 
-// ✅ Useful for debugging
+// ✅ 对调试有用
 log.error("Order processing failed",
     kv("orderId", orderId),
     kv("step", "payment"),
@@ -467,13 +467,13 @@ log.error("Order processing failed",
 
 ---
 
-## Quick Reference
+## 快速参考
 
 ```java
-// === Setup ===
+// === 设置 ===
 private static final Logger log = LoggerFactory.getLogger(MyClass.class);
 
-// === Logging with structured fields ===
+// === 带结构化字段的日志 ===
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
 log.info("Event", kv("key1", value1), kv("key2", value2));
@@ -482,41 +482,41 @@ log.error("Failed", kv("context", ctx), exception);
 // === MDC ===
 MDC.put("requestId", requestId);
 MDC.put("userId", userId);
-// ... all logs now include these
-MDC.clear();  // cleanup
+// ... 所有日志现在包含这些
+MDC.clear();  // 清理
 
-// === Levels ===
-log.error()  // Failures
-log.warn()   // Handled issues
-log.info()   // Business events
-log.debug()  // Technical details
+// === 级别 ===
+log.error()  // 失败
+log.warn()   // 已处理的问题
+log.info()   // 业务事件
+log.debug()  // 技术细节
 ```
 
 ---
 
-## Analyzing Logs (AI/Human)
+## 分析日志（AI/Human）
 
 ```bash
-# Pretty print JSON logs
+# 漂亮打印 JSON 日志
 tail -f app.log | jq .
 
-# Filter errors
+# 过滤错误
 cat app.log | jq 'select(.level == "ERROR")'
 
-# Follow request flow
+# 跟踪请求流程
 cat app.log | jq 'select(.requestId == "abc123")'
 
-# Find slow operations (>1s)
+# 查找慢操作（>1s）
 cat app.log | jq 'select(.duration_ms > 1000)'
 
-# Get timeline of steps
+# 获取步骤的时间线
 cat app.log | jq 'select(.requestId == "abc123") | {time: .timestamp, step: .step, message: .message}'
 ```
 
 ---
 
-## Related Skills
+## 相关技能
 
-- `spring-boot-patterns` - Spring Boot configuration
-- `jpa-patterns` - Database logging (SQL queries)
-- Future: `observability-patterns` - Metrics, tracing, full observability
+- `spring-boot-patterns` - Spring Boot 配置
+- `jpa-patterns` - 数据库日志（SQL 查询）
+- 未来：`observability-patterns` - 指标、追踪、完整可观测性
