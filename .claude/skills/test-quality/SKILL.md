@@ -1,19 +1,19 @@
 ---
 name: test-quality
-description: 使用 JUnit 5 和 AssertJ 断言编写高质量测试。当用户说 "add tests" with AssertJ assertions. Use when user says "add tests", "write tests", "improve test coverage", or when reviewing/creating test classes for Java code.
+description: 使用 JUnit 5 和 AssertJ 断言编写高质量测试。当用户说 "add tests"、"write tests"、"improve test coverage" 或审查/创建 Java 代码的测试类时使用。
 ---
 
-# Test Quality Skill (JUnit 5 + AssertJ)
+# Test Quality 技能 (JUnit 5 + AssertJ)
 
-Write high-quality, maintainable tests for Java projects using modern best practices.
+使用现代最佳实践为 Java 项目编写高质量、可维护的测试。
 
-## When to Use
-- Writing new test classes
-- Reviewing/improving existing tests
-- User asks to "add tests" / "improve test coverage"
-- Code review mentions missing tests
+## 何时使用
+- 编写新的测试类
+- 审查/改进现有测试
+- 用户要求 "add tests" / "improve test coverage"
+- 代码审查提到缺少测试
 
-## Framework Preferences
+## 框架偏好
 
 ### JUnit 5 (Jupiter)
 ```java
@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Nested;
 import static org.assertj.core.api.Assertions.*;
 ```
 
-### AssertJ over standard assertions
-✅ **Use AssertJ**:
+### AssertJ 优于标准断言
+✅ **使用 AssertJ**：
 ```java
 assertThat(plugin.getState())
     .as("Plugin should be started after initialization")
@@ -37,28 +37,28 @@ assertThat(plugins)
     .containsExactly("plugin1", "plugin2", "plugin3");
 ```
 
-❌ **Avoid JUnit assertions**:
+❌ **避免 JUnit assertions**：
 ```java
-assertEquals(PluginState.STARTED, plugin.getState()); // Less readable
-assertTrue(plugins.size() == 3); // Less descriptive failures
+assertEquals(PluginState.STARTED, plugin.getState()); // 可读性较差
+assertTrue(plugins.size() == 3); // 失败描述不够详细
 ```
 
-## Test Structure (AAA Pattern)
+## 测试结构 (AAA 模式)
 
-Always use Arrange-Act-Assert pattern:
+始终使用 Arrange-Act-Assert 模式：
 
 ```java
 @Test
 @DisplayName("Should load plugin from valid directory")
 void shouldLoadPluginFromValidDirectory() {
-    // Arrange - Setup test data and dependencies
+    // Arrange - 设置测试数据和依赖
     Path pluginDir = Paths.get("test-plugins/valid-plugin");
     PluginLoader loader = new DefaultPluginLoader();
-    
-    // Act - Execute the behavior being tested
+
+    // Act - 执行被测试的行为
     Plugin plugin = loader.load(pluginDir);
-    
-    // Assert - Verify results
+
+    // Assert - 验证结果
     assertThat(plugin)
         .isNotNull()
         .extracting(Plugin::getId, Plugin::getVersion)
@@ -66,31 +66,31 @@ void shouldLoadPluginFromValidDirectory() {
 }
 ```
 
-## Naming Conventions
+## 命名约定
 
-### Test class names
+### 测试类名称
 ```java
-// Class under test: PluginManager
-PluginManagerTest           // ✅ Simple, standard
-PluginManagerShould         // ✅ BDD style (if team prefers)
-TestPluginManager           // ❌ Avoid
+// 被测试类：PluginManager
+PluginManagerTest           // ✅ 简单、标准
+PluginManagerShould         // ✅ BDD style（如果团队偏好）
+TestPluginManager           // ❌ 避免
 ```
 
-### Test method names
+### 测试方法名称
 
-**Option 1: should_expectedBehavior_when_condition** (descriptive)
+**选项 1：should_expectedBehavior_when_condition**（描述性）
 ```java
 @Test
 void should_throwException_when_pluginDirectoryNotFound() { }
 
-@Test  
+@Test
 void should_returnEmptyList_when_noPluginsAvailable() { }
 
 @Test
 void should_loadPluginsInDependencyOrder_when_multipleDependencies() { }
 ```
 
-**Option 2: Natural language with @DisplayName** (cleaner code)
+**选项 2：自然语言 + @DisplayName**（代码更简洁）
 ```java
 @Test
 @DisplayName("Should load all plugins from directory")
@@ -101,92 +101,92 @@ void loadAllPlugins() { }
 void invalidPluginDescriptor() { }
 ```
 
-## AssertJ Power Features
+## AssertJ 强大功能
 
-### Collection assertions
+### 集合断言
 ```java
-// Basic collection checks
+// 基本集合检查
 assertThat(plugins)
     .isNotEmpty()
     .hasSize(2)
     .doesNotContainNull();
 
-// Advanced filtering and extraction
+// 高级过滤和提取
 assertThat(plugins)
     .filteredOn(p -> p.getState() == PluginState.STARTED)
     .extracting(Plugin::getId)
     .containsExactlyInAnyOrder("plugin-a", "plugin-b");
 
-// All elements match condition
+// 所有元素匹配条件
 assertThat(plugins)
     .allMatch(p -> p.getVersion() != null, "All plugins have version");
 ```
 
-### Exception assertions
+### 异常断言
 ```java
-// Basic exception check
+// 基本异常检查
 assertThatThrownBy(() -> loader.load(invalidPath))
     .isInstanceOf(PluginException.class)
     .hasMessageContaining("Invalid plugin descriptor");
 
-// Detailed exception verification
+// 详细异常验证
 assertThatThrownBy(() -> manager.startPlugin("missing-plugin"))
     .isInstanceOf(PluginException.class)
     .hasMessageContaining("Plugin not found")
     .hasCauseInstanceOf(IllegalArgumentException.class)
-    .hasNoCause(); // or verify cause chain
+    .hasNoCause(); // 或验证原因链
 
-// With assertThatExceptionOfType (more readable)
+// 使用 assertThatExceptionOfType（更易读）
 assertThatExceptionOfType(PluginException.class)
     .isThrownBy(() -> loader.load(invalidPath))
     .withMessageContaining("Invalid")
     .withMessageMatching("Invalid .* descriptor");
 ```
 
-### Object assertions
+### 对象断言
 ```java
-// Extract and verify multiple properties
+// 提取并验证多个属性
 assertThat(plugin)
     .isNotNull()
     .extracting("id", "version", "state")
     .containsExactly("my-plugin", "1.0", PluginState.STARTED);
 
-// Using method references (type-safe)
+// 使用方法引用（类型安全）
 assertThat(plugin)
     .extracting(Plugin::getId, Plugin::getVersion, Plugin::getState)
     .containsExactly("my-plugin", "1.0", PluginState.STARTED);
 
-// Field by field comparison
+// 逐字段比较
 assertThat(actualPlugin)
     .usingRecursiveComparison()
     .isEqualTo(expectedPlugin);
 ```
 
-### Soft assertions (multiple checks)
+### 软断言（多个检查）
 ```java
 @Test
 void shouldHaveValidPluginDescriptor() {
     SoftAssertions softly = new SoftAssertions();
-    
+
     softly.assertThat(descriptor.getId())
         .as("Plugin ID")
         .isNotBlank()
         .matches("[a-z0-9-]+");
-    
+
     softly.assertThat(descriptor.getVersion())
         .as("Plugin version")
         .matches("\\d+\\.\\d+\\.\\d+");
-    
+
     softly.assertThat(descriptor.getDependencies())
         .as("Dependencies")
         .isNotNull()
         .doesNotContainNull();
-    
-    softly.assertAll(); // All assertions evaluated, even if some fail
+
+    softly.assertAll(); // 所有断言都被评估，即使有些失败
 }
 ```
 
-### String assertions
+### 字符串断言
 ```java
 assertThat(errorMessage)
     .startsWith("Error:")
@@ -196,57 +196,57 @@ assertThat(errorMessage)
     .hasLineCount(3);
 ```
 
-## Test Organization
+## 测试组织
 
-### Nested tests for clarity
+### 嵌套测试以保持清晰
 ```java
 @DisplayName("PluginManager")
 class PluginManagerTest {
-    
+
     private PluginManager manager;
-    
+
     @BeforeEach
     void setUp() {
         manager = new DefaultPluginManager();
     }
-    
+
     @Nested
     @DisplayName("when starting plugins")
     class WhenStartingPlugins {
-        
+
         @Test
         @DisplayName("should start all plugins in dependency order")
         void shouldStartInDependencyOrder() {
-            // Test implementation
+            // 测试实现
         }
-        
+
         @Test
         @DisplayName("should skip disabled plugins")
         void shouldSkipDisabledPlugins() {
-            // Test implementation
+            // 测试实现
         }
-        
+
         @Test
         @DisplayName("should fail if circular dependency detected")
         void shouldFailOnCircularDependency() {
-            // Test implementation
+            // 测试实现
         }
     }
-    
+
     @Nested
-    @DisplayName("when stopping plugins")  
+    @DisplayName("when stopping plugins")
     class WhenStoppingPlugins {
-        
+
         @Test
         @DisplayName("should stop plugins in reverse dependency order")
         void shouldStopInReverseOrder() {
-            // Test implementation
+            // 测试实现
         }
     }
 }
 ```
 
-### Parameterized tests
+### 参数化测试
 ```java
 @ParameterizedTest
 @ValueSource(strings = {"1.0.0", "2.1.3", "10.0.0-SNAPSHOT"})
@@ -266,7 +266,7 @@ void shouldAcceptValidVersions(String version) {
 @DisplayName("Should load plugin with expected state")
 void shouldLoadPluginWithState(String id, String version, PluginState expectedState) {
     Plugin plugin = createPlugin(id, version);
-    
+
     assertThat(plugin.getState()).isEqualTo(expectedState);
 }
 
@@ -287,22 +287,22 @@ static Stream<Arguments> invalidPluginDescriptors() {
 }
 ```
 
-## Common Patterns
+## 常见模式
 
-### Testing with mocks (Mockito)
+### 使用 mock 测试（Mockito）
 ```java
 @ExtendWith(MockitoExtension.class)
 class PluginManagerTest {
-    
+
     @Mock
     private PluginRepository repository;
-    
+
     @Mock
     private PluginValidator validator;
-    
+
     @InjectMocks
     private DefaultPluginManager manager;
-    
+
     @Test
     @DisplayName("Should load plugins from repository")
     void shouldLoadPluginsFromRepository() {
@@ -312,10 +312,10 @@ class PluginManagerTest {
             createDescriptor("plugin2")
         );
         when(repository.findAll()).thenReturn(descriptors);
-        
+
         // When
         List<Plugin> plugins = manager.loadAll();
-        
+
         // Then
         assertThat(plugins).hasSize(2);
         verify(repository).findAll();
@@ -324,25 +324,25 @@ class PluginManagerTest {
 }
 ```
 
-### Test fixtures with @BeforeEach
+### 使用 @BeforeEach 的测试夹具
 ```java
 @BeforeEach
 void setUp() throws IOException {
-    // Create temporary directory for test plugins
+    // 为测试插件创建临时目录
     pluginDir = Files.createTempDirectory("test-plugins");
-    
-    // Initialize plugin manager with test config
+
+    // 使用测试配置初始化 plugin manager
     PluginConfig config = PluginConfig.builder()
         .pluginDirectory(pluginDir)
         .enableValidation(true)
         .build();
-    
+
     pluginManager = new DefaultPluginManager(config);
 }
 
 @AfterEach
 void tearDown() throws IOException {
-    // Clean up test resources
+    // 清理测试资源
     if (pluginManager != null) {
         pluginManager.stopAll();
     }
@@ -352,13 +352,13 @@ void tearDown() throws IOException {
 }
 ```
 
-### Testing async operations
+### 测试异步操作
 ```java
 @Test
 @DisplayName("Should complete async plugin loading")
 void shouldCompleteAsyncLoading() {
     CompletableFuture<Plugin> future = manager.loadAsync(pluginPath);
-    
+
     assertThat(future)
         .succeedsWithin(Duration.ofSeconds(5))
         .satisfies(plugin -> {
@@ -368,27 +368,27 @@ void shouldCompleteAsyncLoading() {
 }
 ```
 
-## Token Optimization
+## Token 优化
 
-When writing tests:
+编写测试时：
 
-### 1. Generate test skeleton first
+### 1. 首先生成测试骨架
 ```java
-// Phase 1: List test cases as comments
+// 阶段 1：将测试用例列为注释
 // @Test void shouldLoadPlugin() { }
 // @Test void shouldThrowExceptionForInvalidPlugin() { }
 // @Test void shouldHandleMissingDependencies() { }
 ```
 
-### 2. Implement incrementally
-- One test at a time
-- Verify compilation after each
-- Run tests to validate
-- Refactor if needed
+### 2. 增量实现
+- 一次一个测试
+- 每次后验证编译
+- 运行测试以验证
+- 如需要则重构
 
-### 3. Reuse patterns
+### 3. 重用模式
 ```java
-// Extract common setup to helper methods
+// 将通用设置提取到辅助方法
 private Plugin createTestPlugin(String id, String version) {
     return Plugin.builder()
         .id(id)
@@ -397,70 +397,70 @@ private Plugin createTestPlugin(String id, String version) {
 }
 ```
 
-## Code Coverage Guidelines
+## 代码覆盖率指南
 
-- **Aim for**: 80%+ line coverage on core logic
-- **Focus on**: Business logic, complex algorithms, edge cases
-- **Skip**: Trivial getters/setters, POJOs, generated code
-- **Test**: Happy paths + error conditions + boundary cases
+- **目标**：核心逻辑 80%+ 行覆盖率
+- **重点**：业务逻辑、复杂算法、边缘情况
+- **跳过**：简单的 getter/setter、POJO、生成的代码
+- **测试**：快乐路径 + 错误条件 + 边界情况
 
-### What to test
-✅ **High priority**:
+### 测试什么
+✅ **高优先级**：
 - Public APIs
-- Complex business logic
-- Error handling
-- Edge cases and boundaries
-- Integration points
+- 复杂的业务逻辑
+- 错误处理
+- 边缘情况和边界
+- 集成点
 
-❌ **Low priority**:
+❌ **低优先级**：
 ```java
-// Simple getters/setters
+// 简单的 getter/setter
 public String getId() { return id; }
 public void setId(String id) { this.id = id; }
 
-// Simple POJOs with no logic
+// 没有逻辑的简单 POJO
 public class PluginInfo {
     private String id;
     private String version;
-    // ... only getters/setters
+    // ... 只有 getter/setter
 }
 ```
 
-## Anti-patterns
+## 反模式
 
-❌ **Avoid**:
+❌ **避免**：
 ```java
-// 1. Generic test names
+// 1. 通用测试名称
 @Test void test1() { }
 @Test void testPlugin() { }
 
-// 2. Testing implementation details
-assertThat(plugin.internalState.flag).isTrue(); // Couples to internals
+// 2. 测试实现细节
+assertThat(plugin.internalState.flag).isTrue(); // 耦合到内部实现
 
-// 3. Brittle assertions with timestamps
+// 3. 使用时间戳的脆弱断言
 assertThat(message).isEqualTo("Error at 2024-01-26 10:30:15");
 
-// 4. Multiple unrelated assertions
+// 4. 多个不相关的断言
 @Test void testEverything() {
-    // 50 unrelated assertions
+    // 50 个不相关的断言
     assertThat(plugin.getId()).isNotNull();
     assertThat(manager.getCount()).isEqualTo(5);
     assertThat(config.isEnabled()).isTrue();
-    // ... mixing multiple concerns
+    // ... 混合多个关注点
 }
 
-// 5. Ignoring exceptions
+// 5. 忽略异常
 @Test void shouldFail() {
     try {
         loader.load(invalidPath);
         fail("Should have thrown exception");
     } catch (Exception e) {
-        // Swallowing exception details
+        // 吞掉异常细节
     }
 }
 ```
 
-✅ **Prefer**:
+✅ **首选**：
 ```java
 @Test
 @DisplayName("Should reject plugin with missing dependencies")
@@ -469,16 +469,16 @@ void shouldRejectPluginWithMissingDependencies() {
         .id("test-plugin")
         .dependencies(List.of("missing-dep"))
         .build();
-    
+
     assertThatThrownBy(() -> manager.load(descriptor))
         .isInstanceOf(PluginException.class)
         .hasMessageContaining("Missing dependencies: missing-dep");
 }
 ```
 
-## Integration with Coverage Tools
+## 与覆盖率工具集成
 
-### Maven configuration
+### Maven 配置
 ```xml
 <plugin>
     <groupId>org.jacoco</groupId>
@@ -501,28 +501,28 @@ void shouldRejectPluginWithMissingDependencies() {
 </plugin>
 ```
 
-### After test generation, suggest:
+### 测试生成后，建议：
 ```bash
-# Run tests with coverage
+# 运行测试并生成覆盖率
 mvn clean test jacoco:report
 
-# View coverage report
+# 查看覆盖率报告
 open target/site/jacoco/index.html
 
-# Check coverage threshold
-mvn verify # Fails if below configured threshold
+# 检查覆盖率阈值
+mvn verify # 如果低于配置的阈值则失败
 ```
 
-## Quick Reference
+## 快速参考
 
 ```java
-// ===== Basic Assertions =====
+// ===== 基本断言 =====
 assertThat(value).isEqualTo(expected);
 assertThat(value).isNotNull();
 assertThat(value).isInstanceOf(String.class);
 assertThat(number).isPositive().isGreaterThan(5);
 
-// ===== Collections =====
+// ===== 集合 =====
 assertThat(list).hasSize(3);
 assertThat(list).contains(item);
 assertThat(list).containsExactly(item1, item2, item3);
@@ -530,46 +530,46 @@ assertThat(list).containsExactlyInAnyOrder(item2, item1, item3);
 assertThat(list).doesNotContain(item);
 assertThat(list).allMatch(predicate);
 
-// ===== Strings =====
+// ===== 字符串 =====
 assertThat(str).isNotBlank();
 assertThat(str).startsWith("prefix");
 assertThat(str).endsWith("suffix");
 assertThat(str).contains("substring");
 assertThat(str).matches("regex\\d+");
 
-// ===== Exceptions =====
+// ===== 异常 =====
 assertThatThrownBy(() -> code())
     .isInstanceOf(PluginException.class)
     .hasMessageContaining("error");
 
 assertThatNoException().isThrownBy(() -> code());
 
-// ===== Custom Descriptions =====
+// ===== 自定义描述 =====
 assertThat(userId)
     .as("User ID should be positive")
     .isPositive();
 
-// ===== Object Comparison =====
+// ===== 对象比较 =====
 assertThat(actual)
     .usingRecursiveComparison()
     .ignoringFields("timestamp", "id")
     .isEqualTo(expected);
 ```
 
-## Best Practices Summary
+## 最佳实践总结
 
-1. **Use AssertJ** for all assertions
-2. **Follow AAA pattern** (Arrange-Act-Assert)
-3. **Descriptive names** with @DisplayName
-4. **One concept** per test
-5. **Test behavior**, not implementation
-6. **Extract helpers** for common setup
-7. **Use @Nested** for logical grouping
-8. **Parameterize** similar tests
-9. **Soft assertions** for multiple checks
-10. **Coverage** on business logic, not boilerplate
+1. **所有断言使用 AssertJ**
+2. **遵循 AAA 模式**（Arrange-Act-Assert）
+3. **描述性名称** + @DisplayName
+4. **每个测试一个概念**
+5. **测试行为**，而非实现
+6. **提取辅助方法**用于通用设置
+7. **使用 @Nested** 进行逻辑分组
+8. **参数化**相似测试
+9. **软断言**用于多个检查
+10. **覆盖率**关注业务逻辑，而非样板代码
 
-## References
+## 参考资料
 
 - [AssertJ Documentation](https://assertj.github.io/doc/)
 - [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/)
