@@ -1,46 +1,46 @@
 ---
 name: security-audit
-description: 基于 OWASP Top 10 和安全编码实践的 Java 安全清单。适用于 Spring、Quarkus、Jakarta EE 和纯 Java, input validation, injection prevention, and secure coding. Works with Spring, Quarkus, Jakarta EE, and plain Java. Use when reviewing code security, before releases, or when user asks about vulnerabilities.
+description: 基于 OWASP Top 10 和安全编码实践的 Java 安全清单。适用于 Spring、Quarkus、Jakarta EE 和纯 Java。当审查代码安全、发布前或用户询问漏洞时使用。
 ---
 
-# Security Audit Skill
+# Security Audit 技能
 
-Security checklist for Java applications based on OWASP Top 10 and secure coding practices.
+基于 OWASP Top 10 和安全编码实践的 Java 应用程序安全清单。
 
-## When to Use
-- Security code review
-- Before production releases
-- User asks about "security", "vulnerability", "OWASP"
-- Reviewing authentication/authorization code
-- Checking for injection vulnerabilities
+## 何时使用
+- 安全代码审查
+- 生产发布之前
+- 用户询问 "security"、"vulnerability"、"OWASP"
+- 审查认证/授权代码
+- 检查注入漏洞
 
 ---
 
-## OWASP Top 10 Quick Reference
+## OWASP Top 10 快速参考
 
-| # | Risk | Java Mitigation |
+| # | Risk | Java 缓解措施 |
 |---|------|-----------------|
-| A01 | Broken Access Control | Role-based checks, deny by default |
-| A02 | Cryptographic Failures | Use strong algorithms, no hardcoded secrets |
-| A03 | Injection | Parameterized queries, input validation |
-| A04 | Insecure Design | Threat modeling, secure defaults |
-| A05 | Security Misconfiguration | Disable debug, secure headers |
-| A06 | Vulnerable Components | Dependency scanning, updates |
-| A07 | Authentication Failures | Strong passwords, MFA, session management |
-| A08 | Data Integrity Failures | Verify signatures, secure deserialization |
-| A09 | Logging Failures | Log security events, no sensitive data |
-| A10 | SSRF | Validate URLs, allowlist domains |
+| A01 | Broken Access Control | 基于角色的检查、默认拒绝 |
+| A02 | Cryptographic Failures | 使用强算法、无硬编码密钥 |
+| A03 | Injection | 参数化查询、输入验证 |
+| A04 | Insecure Design | 威胁建模、安全默认值 |
+| A05 | Security Misconfiguration | 禁用 debug、安全头 |
+| A06 | Vulnerable Components | 依赖扫描、更新 |
+| A07 | Authentication Failures | 强密码、MFA、会话管理 |
+| A08 | Data Integrity Failures | 验证签名、安全反序列化 |
+| A09 | Logging Failures | 记录安全事件、无敏感数据 |
+| A10 | SSRF | 验证 URL、允许列表域名 |
 
 ---
 
-## Input Validation (All Frameworks)
+## 输入验证（所有框架）
 
 ### Bean Validation (JSR 380)
 
-Works in Spring, Quarkus, Jakarta EE, and standalone.
+适用于 Spring、Quarkus、Jakarta EE 和独立使用。
 
 ```java
-// ✅ GOOD: Validate at boundary
+// ✅ 好：在边界验证
 public class CreateUserRequest {
 
     @NotNull(message = "Username is required")
@@ -63,16 +63,16 @@ public class CreateUserRequest {
     private Integer age;
 }
 
-// Controller/Resource - trigger validation
+// Controller/Resource - 触发验证
 public Response createUser(@Valid CreateUserRequest request) {
-    // request is already validated
+    // request 已经验证
 }
 ```
 
-### Custom Validators
+### 自定义验证器
 
 ```java
-// Custom annotation
+// 自定义注解
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = SafeHtmlValidator.class)
@@ -82,7 +82,7 @@ public @interface SafeHtml {
     Class<? extends Payload>[] payload() default {};
 }
 
-// Validator implementation
+// 验证器实现
 public class SafeHtmlValidator implements ConstraintValidator<SafeHtml, String> {
 
     private static final Pattern DANGEROUS_PATTERN = Pattern.compile(
@@ -97,15 +97,15 @@ public class SafeHtmlValidator implements ConstraintValidator<SafeHtml, String> 
 }
 ```
 
-### Allowlist vs Blocklist
+### 允许列表 vs 拒绝列表
 
 ```java
-// ❌ BAD: Blocklist (attackers find bypasses)
+// ❌ 坏：拒绝列表（攻击者找到绕过方法）
 if (input.contains("<script>")) {
     throw new ValidationException("Invalid input");
 }
 
-// ✅ GOOD: Allowlist (only permit known-good)
+// ✅ 好：允许列表（仅允许已知良好的）
 private static final Pattern SAFE_NAME = Pattern.compile("^[a-zA-Z\\s'-]{1,100}$");
 
 if (!SAFE_NAME.matcher(input).matches()) {
@@ -115,45 +115,45 @@ if (!SAFE_NAME.matcher(input).matches()) {
 
 ---
 
-## SQL Injection Prevention
+## SQL 注入防护
 
-### JPA/Hibernate (All Frameworks)
+### JPA/Hibernate（所有框架）
 
 ```java
-// ✅ GOOD: Parameterized queries
+// ✅ 好：参数化查询
 @Query("SELECT u FROM User u WHERE u.email = :email")
 Optional<User> findByEmail(@Param("email") String email);
 
-// ✅ GOOD: Criteria API
+// ✅ 好：Criteria API
 CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 CriteriaQuery<User> query = cb.createQuery(User.class);
 Root<User> user = query.from(User.class);
-query.where(cb.equal(user.get("email"), email));  // Safe
+query.where(cb.equal(user.get("email"), email));  // 安全
 
-// ✅ GOOD: Named parameters
+// ✅ 好：命名参数
 TypedQuery<User> query = entityManager.createQuery(
     "SELECT u FROM User u WHERE u.status = :status", User.class);
-query.setParameter("status", status);  // Safe
+query.setParameter("status", status);  // 安全
 
-// ❌ BAD: String concatenation
-String jpql = "SELECT u FROM User u WHERE u.email = '" + email + "'";  // VULNERABLE!
+// ❌ 坏：字符串拼接
+String jpql = "SELECT u FROM User u WHERE u.email = '" + email + "'";  // 易受攻击！
 ```
 
-### Native Queries
+### 原生查询
 
 ```java
-// ✅ GOOD: Parameterized native query
+// ✅ 好：参数化原生查询
 @Query(value = "SELECT * FROM users WHERE email = ?1", nativeQuery = true)
 User findByEmailNative(String email);
 
-// ❌ BAD: Concatenated native query
-String sql = "SELECT * FROM users WHERE email = '" + email + "'";  // VULNERABLE!
+// ❌ 坏：拼接的原生查询
+String sql = "SELECT * FROM users WHERE email = '" + email + "'";  // 易受攻击！
 ```
 
-### JDBC (Plain Java)
+### JDBC（纯 Java）
 
 ```java
-// ✅ GOOD: PreparedStatement
+// ✅ 好：PreparedStatement
 String sql = "SELECT * FROM users WHERE email = ? AND status = ?";
 try (PreparedStatement stmt = connection.prepareStatement(sql)) {
     stmt.setString(1, email);
@@ -161,28 +161,28 @@ try (PreparedStatement stmt = connection.prepareStatement(sql)) {
     ResultSet rs = stmt.executeQuery();
 }
 
-// ❌ BAD: Statement with concatenation
-String sql = "SELECT * FROM users WHERE email = '" + email + "'";  // VULNERABLE!
+// ❌ 坏：带拼接的 Statement
+String sql = "SELECT * FROM users WHERE email = '" + email + "'";  // 易受攻击！
 Statement stmt = connection.createStatement();
 stmt.executeQuery(sql);
 ```
 
 ---
 
-## XSS Prevention
+## XSS 防护
 
-### Output Encoding
+### 输出编码
 
 ```java
-// ✅ GOOD: Use templating engine's auto-escaping
+// ✅ 好：使用模板引擎的自动转义
 
-// Thymeleaf - auto-escapes by default
-<p th:text="${userInput}">...</p>  // Safe
+// Thymeleaf - 默认自动转义
+<p th:text="${userInput}">...</p>  // 安全
 
-// To display HTML (dangerous, use carefully):
-<p th:utext="${trustedHtml}">...</p>  // Only for trusted content!
+// 要显示 HTML（危险，小心使用）：
+<p th:utext="${trustedHtml}">...</p>  // 仅用于可信内容！
 
-// ✅ GOOD: Manual encoding when needed
+// ✅ 好：需要时手动编码
 import org.owasp.encoder.Encode;
 
 String safe = Encode.forHtml(userInput);
@@ -190,7 +190,7 @@ String safeJs = Encode.forJavaScript(userInput);
 String safeUrl = Encode.forUriComponent(userInput);
 ```
 
-**Maven dependency for OWASP Encoder:**
+**OWASP Encoder 的 Maven 依赖：**
 ```xml
 <dependency>
     <groupId>org.owasp.encoder</groupId>
@@ -199,10 +199,10 @@ String safeUrl = Encode.forUriComponent(userInput);
 </dependency>
 ```
 
-### Content Security Policy
+### 内容安全策略
 
 ```java
-// Add CSP header to prevent inline scripts
+// 添加 CSP 头以防止内联脚本
 
 // Spring Boot
 @Configuration
@@ -219,7 +219,7 @@ public class SecurityConfig {
     }
 }
 
-// Servlet Filter (works everywhere)
+// Servlet Filter（适用于所有地方）
 @WebFilter("/*")
 public class SecurityHeadersFilter implements Filter {
     @Override
@@ -237,22 +237,22 @@ public class SecurityHeadersFilter implements Filter {
 
 ---
 
-## CSRF Protection
+## CSRF 防护
 
 ### Spring Security
 
 ```java
-// CSRF enabled by default for browser clients
+// 默认为浏览器客户端启用 CSRF
 @Configuration
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // For REST APIs with JWT (stateless) - can disable CSRF
+            // 对于使用 JWT 的 REST API（无状态）- 可以禁用 CSRF
             .csrf(csrf -> csrf.disable())
 
-            // For browser apps with sessions - keep CSRF enabled
+            // 对于带会话的浏览器应用 - 保持启用 CSRF
             .csrf(csrf -> csrf
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             );
@@ -271,32 +271,32 @@ quarkus.http.csrf.cookie-name=XSRF-TOKEN
 
 ---
 
-## Authentication & Authorization
+## 认证与授权
 
-### Password Storage
+### 密码存储
 
 ```java
-// ✅ GOOD: Use BCrypt or Argon2
+// ✅ 好：使用 BCrypt 或 Argon2
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 
-// BCrypt (widely supported)
+// BCrypt（广泛支持）
 PasswordEncoder encoder = new BCryptPasswordEncoder(12);  // strength 12
 String hash = encoder.encode(rawPassword);
 boolean matches = encoder.matches(rawPassword, hash);
 
-// Argon2 (recommended for new projects)
+// Argon2（推荐用于新项目）
 PasswordEncoder encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
 String hash = encoder.encode(rawPassword);
 
-// ❌ BAD: MD5, SHA1, SHA256 without salt
-String hash = DigestUtils.md5Hex(password);  // NEVER for passwords!
+// ❌ 坏：MD5、SHA1、SHA256 不加盐
+String hash = DigestUtils.md5Hex(password);  // 永远不要用于密码！
 ```
 
-### Authorization Checks
+### 授权检查
 
 ```java
-// ✅ GOOD: Check authorization at service layer
+// ✅ 好：在 service 层检查授权
 @Service
 public class DocumentService {
 
@@ -304,7 +304,7 @@ public class DocumentService {
         Document doc = documentRepository.findById(documentId)
             .orElseThrow(() -> new NotFoundException("Document not found"));
 
-        // Authorization check
+        // 授权检查
         if (!doc.getOwnerId().equals(currentUser.getId()) &&
             !currentUser.hasRole("ADMIN")) {
             throw new AccessDeniedException("Not authorized to access this document");
@@ -314,14 +314,14 @@ public class DocumentService {
     }
 }
 
-// ❌ BAD: Only check at controller level, trust user input
+// ❌ 坏：仅在 controller 层检查，信任用户输入
 @GetMapping("/documents/{id}")
 public Document getDocument(@PathVariable Long id) {
-    return documentRepository.findById(id).orElseThrow();  // No auth check!
+    return documentRepository.findById(id).orElseThrow();  // 无授权检查！
 }
 ```
 
-### Spring Security Annotations
+### Spring Security 注解
 
 ```java
 @PreAuthorize("hasRole('ADMIN')")
@@ -336,32 +336,32 @@ public Document getDocument(Long documentId) { }
 
 ---
 
-## Secrets Management
+## 密钥管理
 
-### Never Hardcode Secrets
+### 永远不要硬编码密钥
 
 ```java
-// ❌ BAD: Hardcoded secrets
+// ❌ 坏：硬编码密钥
 private static final String API_KEY = "sk-1234567890abcdef";
 private static final String DB_PASSWORD = "admin123";
 
-// ✅ GOOD: Environment variables
+// ✅ 好：环境变量
 String apiKey = System.getenv("API_KEY");
 
-// ✅ GOOD: External configuration
+// ✅ 好：外部配置
 @Value("${api.key}")
 private String apiKey;
 
-// ✅ GOOD: Secrets manager
+// ✅ 好：密钥管理器
 @Autowired
 private SecretsManager secretsManager;
 String apiKey = secretsManager.getSecret("api-key");
 ```
 
-### Configuration Files
+### 配置文件
 
 ```yaml
-# ✅ GOOD: Reference environment variables
+# ✅ 好：引用环境变量
 spring:
   datasource:
     password: ${DB_PASSWORD}
@@ -369,16 +369,16 @@ spring:
 api:
   key: ${API_KEY}
 
-# ❌ BAD: Hardcoded in application.yml
+# ❌ 坏：在 application.yml 中硬编码
 spring:
   datasource:
-    password: admin123  # NEVER!
+    password: admin123  # 永远不要！
 ```
 
 ### .gitignore
 
 ```gitignore
-# Never commit these
+# 永远不要提交这些
 .env
 *.pem
 *.key
@@ -389,31 +389,31 @@ application-local.yml
 
 ---
 
-## Secure Deserialization
+## 安全反序列化
 
-### Avoid Java Serialization
+### 避免 Java 序列化
 
 ```java
-// ❌ DANGEROUS: Java ObjectInputStream
+// ❌ 危险：Java ObjectInputStream
 ObjectInputStream ois = new ObjectInputStream(untrustedInput);
-Object obj = ois.readObject();  // Remote Code Execution risk!
+Object obj = ois.readObject();  // 远程代码执行风险！
 
-// ✅ GOOD: Use JSON with Jackson
+// ✅ 好：使用 JSON 与 Jackson
 ObjectMapper mapper = new ObjectMapper();
-// Disable dangerous features
+// 禁用危险功能
 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 mapper.activateDefaultTyping(
     LaissezFaireSubTypeValidator.instance,
     ObjectMapper.DefaultTyping.NON_FINAL
-);  // Be careful with polymorphic types!
+);  // 小心多态类型！
 
 User user = mapper.readValue(json, User.class);
 ```
 
-### Jackson Security
+### Jackson 安全
 
 ```java
-// ✅ Configure Jackson safely
+// ✅ 安全配置 Jackson
 @Configuration
 public class JacksonConfig {
 
@@ -421,10 +421,10 @@ public class JacksonConfig {
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
 
-        // Prevent unknown properties exploitation
+        // 防止未知属性利用
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        // Don't allow class type in JSON (prevents gadget attacks)
+        // 不允许 JSON 中的类类型（防止小工具攻击）
         mapper.deactivateDefaultTyping();
 
         return mapper;
@@ -434,7 +434,7 @@ public class JacksonConfig {
 
 ---
 
-## Dependency Security
+## 依赖安全
 
 ### OWASP Dependency Check
 
@@ -452,42 +452,42 @@ public class JacksonConfig {
         </execution>
     </executions>
     <configuration>
-        <failBuildOnCVSS>7</failBuildOnCVSS>  <!-- Fail on high severity -->
+        <failBuildOnCVSS>7</failBuildOnCVSS>  <!-- 高严重性时失败 -->
     </configuration>
 </plugin>
 ```
 
-**Run:**
+**运行：**
 ```bash
 mvn dependency-check:check
-# Report: target/dependency-check-report.html
+# 报告：target/dependency-check-report.html
 ```
 
-### Keep Dependencies Updated
+### 保持依赖更新
 
 ```bash
-# Check for updates
+# 检查更新
 mvn versions:display-dependency-updates
 
-# Update to latest
+# 更新到最新
 mvn versions:use-latest-releases
 ```
 
 ---
 
-## Security Headers
+## 安全头
 
-### Recommended Headers
+### 推荐的头
 
 | Header | Value | Purpose |
 |--------|-------|---------|
-| `Content-Security-Policy` | `default-src 'self'` | Prevent XSS |
-| `X-Content-Type-Options` | `nosniff` | Prevent MIME sniffing |
-| `X-Frame-Options` | `DENY` | Prevent clickjacking |
-| `Strict-Transport-Security` | `max-age=31536000` | Force HTTPS |
-| `X-XSS-Protection` | `1; mode=block` | Legacy XSS filter |
+| `Content-Security-Policy` | `default-src 'self'` | 防止 XSS |
+| `X-Content-Type-Options` | `nosniff` | 防止 MIME 嗅探 |
+| `X-Frame-Options` | `DENY` | 防止点击劫持 |
+| `Strict-Transport-Security` | `max-age=31536000` | 强制 HTTPS |
+| `X-XSS-Protection` | `1; mode=block` | 传统 XSS 过滤器 |
 
-### Spring Boot Configuration
+### Spring Boot 配置
 
 ```java
 @Bean
@@ -504,53 +504,53 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 ---
 
-## Logging Security Events
+## 记录安全事件
 
 ```java
-// ✅ Log security-relevant events
+// ✅ 记录安全相关事件
 log.info("User login successful", kv("userId", userId), kv("ip", clientIp));
 log.warn("Failed login attempt", kv("username", username), kv("ip", clientIp), kv("attempt", attemptCount));
 log.warn("Access denied", kv("userId", userId), kv("resource", resourceId), kv("action", action));
 log.error("Authentication failure", kv("reason", reason), kv("ip", clientIp));
 
-// ❌ NEVER log sensitive data
-log.info("Login: user={}, password={}", username, password);  // NEVER!
-log.debug("Request body: {}", requestWithCreditCard);  // NEVER!
+// ❌ 永远不要记录敏感数据
+log.info("Login: user={}, password={}", username, password);  // 永远不要！
+log.debug("Request body: {}", requestWithCreditCard);  // 永远不要！
 ```
 
 ---
 
-## Security Checklist
+## 安全清单
 
-### Code Review
+### 代码审查
 
-- [ ] Input validated with allowlist patterns
-- [ ] SQL queries use parameters (no concatenation)
-- [ ] Output encoded for context (HTML, JS, URL)
-- [ ] Authorization checked at service layer
-- [ ] No hardcoded secrets
-- [ ] Passwords hashed with BCrypt/Argon2
-- [ ] Sensitive data not logged
-- [ ] CSRF protection enabled (for browser apps)
+- [ ] 使用允许列表模式验证输入
+- [ ] SQL 查询使用参数（无拼接）
+- [ ] 为上下文编码输出（HTML、JS、URL）
+- [ ] 在 service 层检查授权
+- [ ] 无硬编码密钥
+- [ ] 密码使用 BCrypt/Argon2 哈希
+- [ ] 不记录敏感数据
+- [ ] 启用 CSRF 保护（对于浏览器应用）
 
-### Configuration
+### 配置
 
-- [ ] HTTPS enforced
-- [ ] Security headers configured
-- [ ] Debug/dev features disabled in production
-- [ ] Default credentials changed
-- [ ] Error messages don't leak internal details
+- [ ] 强制 HTTPS
+- [ ] 配置安全头
+- [ ] 生产环境中禁用 debug/dev 功能
+- [ ] 更改默认凭据
+- [ ] 错误消息不泄露内部细节
 
-### Dependencies
+### 依赖
 
-- [ ] No known vulnerabilities (OWASP check)
-- [ ] Dependencies up to date
-- [ ] Unnecessary dependencies removed
+- [ ] 无已知漏洞（OWASP 检查）
+- [ ] 依赖是最新的
+- [ ] 删除不必要的依赖
 
 ---
 
-## Related Skills
+## 相关技能
 
-- `java-code-review` - General code review
-- `maven-dependency-audit` - Dependency vulnerability scanning
-- `logging-patterns` - Secure logging practices
+- `java-code-review` - 通用代码审查
+- `maven-dependency-audit` - 依赖漏洞扫描
+- `logging-patterns` - 安全日志实践
